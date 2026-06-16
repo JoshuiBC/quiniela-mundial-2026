@@ -5,34 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiniela Boboty</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#111827}
 .app{max-width:1100px;margin:auto;padding:25px}
 .hero{background:linear-gradient(135deg,#0f766e,#1d4ed8);color:white;padding:30px;border-radius:20px;margin-bottom:20px}
-.hero h1{margin:0;font-size:40px}.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px}
-.nav{display:flex;gap:10px;margin-bottom:20px}.nav button{flex:1}
+.hero h1{margin:0;font-size:40px}
+.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px}
+.nav{display:flex;gap:10px;margin-bottom:20px}
+.nav button{flex:1}
 input,button{padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px}
 button{background:#1d4ed8;color:white;border:none;cursor:pointer;font-weight:bold}
-button:hover{background:#1e40af}.green{background:#0f766e}
+button:hover{background:#1e40af}
+.green{background:#0f766e}
+.red{background:#991b1b}
 .grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
 .match{background:#f8fafc;padding:18px;border-radius:14px;border:1px solid #e5e7eb;margin-bottom:15px}
 .match-title{font-size:20px;font-weight:bold;margin-bottom:10px}
 .score{display:grid;grid-template-columns:1fr 90px 90px auto;gap:10px;align-items:center}
 .notice{background:#eff6ff;border-left:5px solid #2563eb;padding:10px;border-radius:8px;margin:10px 0}
-table{width:100%;border-collapse:collapse}th{background:#1e3a8a;color:white}
-td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
-.vista{display:none}.vista.activa{display:block}
-@media(max-width:750px){.grid,.score,.nav{display:grid;grid-template-columns:1fr}.hero h1{font-size:30px}}
+.locked{background:#fef3c7;border-left:5px solid #d97706}
+table{width:100%;border-collapse:collapse}
+th{background:#1e3a8a;color:white}
+td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
+.vista{display:none}
+.vista.activa{display:block}
+.logout{margin-top:10px}
+@media(max-width:750px){
+  .grid,.score,.nav{display:grid;grid-template-columns:1fr}
+  .hero h1{font-size:30px}
+}
 </style>
 </head>
+
 <body>
 
 <div class="app">
 
 <div class="hero">
   <h1>Quiniela Boboty</h1>
-  <p>Pronósticos diarios, resultados y ranking automático</p>
+  <p>Marcador exacto: 3 puntos. Resultado correcto: 1 punto.</p>
 </div>
 
 <div class="card">
@@ -42,6 +55,7 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
     <input id="pinUsuario" type="password" placeholder="PIN">
     <button onclick="entrar()">Entrar / Registrarse</button>
   </div>
+  <button class="red logout" onclick="cerrarSesion()">Cerrar sesión</button>
   <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN.</div>
 </div>
 
@@ -59,6 +73,7 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
       <button class="green" onclick="cargarTodo()">Cargar jornada</button>
     </div>
   </div>
+
   <div class="card">
     <h2>Partidos del día</h2>
     <div id="partidos"></div>
@@ -69,7 +84,14 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
   <div class="card">
     <h2>Ranking diario</h2>
     <table>
-      <thead><tr><th>Posición</th><th>Usuario</th><th>Puntos</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Usuario</th>
+          <th>Puntos del día</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
       <tbody id="ranking"></tbody>
     </table>
   </div>
@@ -78,9 +100,10 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
 <section id="vista-admin" class="vista">
   <div class="card">
     <h2>Importar partidos desde API</h2>
-    <p>Importa partidos y resultados desde worldcup26.ir.</p>
+    <p>Importa o actualiza partidos y resultados desde worldcup26.ir.</p>
     <button class="green" onclick="importarPartidosAPI()">Importar / actualizar partidos</button>
   </div>
+
   <div class="card">
     <h2>Registrar resultados oficiales</h2>
     <div id="adminResultados"></div>
@@ -92,41 +115,77 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
 <script>
 const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
+
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuario = null;
+
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 
 function mostrarVista(nombre){
-  document.querySelectorAll(".vista").forEach(v=>v.classList.remove("activa"));
+  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
   document.getElementById("vista-" + nombre).classList.add("activa");
+}
+
+function cerrarSesion(){
+  usuario = null;
+  localStorage.removeItem("nombreUsuario");
+  localStorage.removeItem("pinUsuario");
+
+  document.getElementById("nombreUsuario").value = "";
+  document.getElementById("pinUsuario").value = "";
+  document.getElementById("usuarioActivo").innerText = "Sesión cerrada.";
+  document.getElementById("btnAdmin").style.display = "none";
+
+  mostrarVista("pronosticos");
+  cargarTodo();
 }
 
 async function entrar(){
   const nombre = document.getElementById("nombreUsuario").value.trim();
   const pin = document.getElementById("pinUsuario").value.trim();
 
-  if(!nombre || !pin){ alert("Ingrese nombre y PIN."); return; }
-
-  let {data,error} = await db.from("usuarios").select("*").eq("nombre", nombre).maybeSingle();
-
-  if(!data){
-    const nuevo = await db.from("usuarios").insert({nombre, pin, rol:"usuario"}).select().single();
-    data = nuevo.data;
-    error = nuevo.error;
-  } else if(data.pin !== pin){
-    alert("PIN incorrecto.");
+  if(!nombre || !pin){
+    alert("Ingrese nombre y PIN.");
     return;
   }
 
-  if(error){ alert("Error: " + error.message); return; }
+  let {data,error} = await db
+    .from("usuarios")
+    .select("*")
+    .eq("nombre", nombre)
+    .maybeSingle();
+
+  if(!data){
+    const nuevo = await db
+      .from("usuarios")
+      .insert({nombre, pin, rol:"usuario"})
+      .select()
+      .single();
+
+    data = nuevo.data;
+    error = nuevo.error;
+  }else{
+    if(data.pin !== pin){
+      alert("PIN incorrecto.");
+      return;
+    }
+  }
+
+  if(error){
+    alert("Error: " + error.message);
+    return;
+  }
 
   usuario = data;
+
   localStorage.setItem("nombreUsuario", nombre);
   localStorage.setItem("pinUsuario", pin);
 
   document.getElementById("usuarioActivo").innerText = "Usuario activo: " + usuario.nombre;
-  document.getElementById("btnAdmin").style.display = usuario.rol === "admin" ? "block" : "none";
+
+  document.getElementById("btnAdmin").style.display =
+    usuario.rol === "admin" ? "block" : "none";
 
   cargarTodo();
 }
@@ -141,10 +200,10 @@ function normalizarFecha(valor){
   if(valor.includes("/")){
     const partes = valor.split(" ")[0].split("/");
     if(partes.length === 3){
-      let a = partes[0], b = partes[1], c = partes[2];
-      if(c.length === 4){
-        return `${c}-${a.padStart(2,"0")}-${b.padStart(2,"0")}`;
-      }
+      let mes = partes[0];
+      let dia = partes[1];
+      let anio = partes[2];
+      return `${anio}-${mes.padStart(2,"0")}-${dia.padStart(2,"0")}`;
     }
   }
 
@@ -156,7 +215,9 @@ function normalizarFecha(valor){
 
 function obtenerCampo(obj, opciones){
   for(const k of opciones){
-    if(obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
+    if(obj[k] !== undefined && obj[k] !== null && obj[k] !== ""){
+      return obj[k];
+    }
   }
   return null;
 }
@@ -168,14 +229,21 @@ async function importarPartidosAPI(){
   }
 
   try{
-    const resp = await fetch("https://worldcup26.ir/get/games");
-    const json = await resp.json();
+    const resp = await fetch("https://worldcup26.ir/get/games", {
+      method: "GET",
+      headers: {"Accept": "application/json"}
+    });
 
+    if(!resp.ok){
+      throw new Error("HTTP " + resp.status);
+    }
+
+    const json = await resp.json();
     const juegos = Array.isArray(json) ? json : (json.games || json.data || json.response || []);
 
     if(!juegos.length){
       console.log(json);
-      alert("La API respondió, pero no encontré la lista de partidos.");
+      alert("La API respondió, pero no encontré partidos.");
       return;
     }
 
@@ -186,18 +254,24 @@ async function importarPartidosAPI(){
       const fechaRaw = obtenerCampo(g, ["local_date","date","match_date","datetime","utc_date"]);
       const fecha = normalizarFecha(fechaRaw);
 
-      const equipoA = obtenerCampo(g, ["home_team_name_en","home_team","home","team_a","home_team_label"]) || "Equipo por definir";
-      const equipoB = obtenerCampo(g, ["away_team_name_en","away_team","away","team_b","away_team_label"]) || "Equipo por definir";
+      const equipoA =
+        obtenerCampo(g, ["home_team_name_en","home_team","home","team_a","home_team_label"]) ||
+        "Equipo por definir";
+
+      const equipoB =
+        obtenerCampo(g, ["away_team_name_en","away_team","away","team_b","away_team_label"]) ||
+        "Equipo por definir";
 
       const marcadorA = obtenerCampo(g, ["home_score","home_goals","score_home","goals_home"]);
       const marcadorB = obtenerCampo(g, ["away_score","away_goals","score_away","goals_away"]);
 
       const finalizadoRaw = obtenerCampo(g, ["finished","is_finished","status","match_status"]);
-      const cerrado = finalizadoRaw === true ||
-                      finalizadoRaw === "TRUE" ||
-                      finalizadoRaw === "true" ||
-                      finalizadoRaw === "finished" ||
-                      finalizadoRaw === "FT";
+      const cerrado =
+        finalizadoRaw === true ||
+        finalizadoRaw === "TRUE" ||
+        finalizadoRaw === "true" ||
+        finalizadoRaw === "finished" ||
+        finalizadoRaw === "FT";
 
       if(!id || !fecha) continue;
 
@@ -211,7 +285,10 @@ async function importarPartidosAPI(){
         cerrado
       }, {onConflict:"id"});
 
-      if(cerrado) await calcularPuntos(id);
+      if(cerrado){
+        await calcularPuntos(id);
+      }
+
       importados++;
     }
 
@@ -232,18 +309,25 @@ async function cargarTodo(){
 async function cargarPartidos(){
   const fecha = document.getElementById("fecha").value;
 
-  const {data:partidos,error} = await db.from("partidos")
-    .select("*").eq("fecha", fecha).order("id", {ascending:true});
+  const {data:partidos,error} = await db
+    .from("partidos")
+    .select("*")
+    .eq("fecha", fecha)
+    .order("id", {ascending:true});
 
   const contenedor = document.getElementById("partidos");
   const admin = document.getElementById("adminResultados");
+
   contenedor.innerHTML = "";
   admin.innerHTML = "";
 
-  if(error){ contenedor.innerHTML = "Error al cargar partidos."; return; }
+  if(error){
+    contenedor.innerHTML = "Error al cargar partidos.";
+    return;
+  }
 
   if(!partidos || partidos.length === 0){
-    contenedor.innerHTML = "No hay partidos para esta fecha. Ingrese como administrador e importe desde la API.";
+    contenedor.innerHTML = "No hay partidos para esta fecha.";
     admin.innerHTML = "No hay partidos para esta fecha.";
     return;
   }
@@ -252,25 +336,47 @@ async function cargarPartidos(){
     let pronostico = null;
 
     if(usuario){
-      const res = await db.from("pronosticos")
-        .select("*").eq("usuario_id", usuario.id).eq("partido_id", p.id).maybeSingle();
+      const res = await db
+        .from("pronosticos")
+        .select("*")
+        .eq("usuario_id", usuario.id)
+        .eq("partido_id", p.id)
+        .maybeSingle();
+
       pronostico = res.data;
     }
 
-    contenedor.innerHTML += `
-      <div class="match">
-        <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
-        <div class="notice">
-          Resultado oficial: ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
+    if(pronostico){
+      contenedor.innerHTML += `
+        <div class="match">
+          <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
+          <div class="notice">
+            Resultado oficial:
+            ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
+          </div>
+          <div class="notice locked">
+            Pronóstico registrado: ${pronostico.goles_a} - ${pronostico.goles_b}.
+            No se puede modificar.
+          </div>
         </div>
-        <div class="score">
-          <div>Su pronóstico</div>
-          <input id="pa_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_a : ""}">
-          <input id="pb_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_b : ""}">
-          <button onclick="guardarPronostico('${p.id}', ${p.cerrado})">Guardar / Actualizar</button>
+      `;
+    }else{
+      contenedor.innerHTML += `
+        <div class="match">
+          <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
+          <div class="notice">
+            Resultado oficial:
+            ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
+          </div>
+          <div class="score">
+            <div>Su pronóstico</div>
+            <input id="pa_${p.id}" type="number" min="0">
+            <input id="pb_${p.id}" type="number" min="0">
+            <button onclick="guardarPronostico('${p.id}', ${p.cerrado})">Guardar</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
 
     admin.innerHTML += `
       <div class="match">
@@ -287,25 +393,53 @@ async function cargarPartidos(){
 }
 
 async function guardarPronostico(partidoId,cerrado){
-  if(!usuario){ alert("Primero debe ingresar su usuario."); return; }
-  if(cerrado){ alert("Este partido ya está cerrado."); return; }
+  if(!usuario){
+    alert("Primero debe ingresar su usuario.");
+    return;
+  }
+
+  if(cerrado){
+    alert("Este partido ya está cerrado.");
+    return;
+  }
+
+  const existe = await db
+    .from("pronosticos")
+    .select("id")
+    .eq("usuario_id", usuario.id)
+    .eq("partido_id", partidoId)
+    .maybeSingle();
+
+  if(existe.data){
+    alert("Ya registró un pronóstico para este partido. No se puede modificar.");
+    cargarTodo();
+    return;
+  }
 
   const golesA = document.getElementById("pa_" + partidoId).value;
   const golesB = document.getElementById("pb_" + partidoId).value;
 
-  if(golesA === "" || golesB === ""){ alert("Ingrese ambos marcadores."); return; }
+  if(golesA === "" || golesB === ""){
+    alert("Ingrese ambos marcadores.");
+    return;
+  }
 
-  const {error} = await db.from("pronosticos").upsert({
-    usuario_id: usuario.id,
-    partido_id: partidoId,
-    goles_a: Number(golesA),
-    goles_b: Number(golesB),
-    actualizado_en: new Date().toISOString()
-  }, {onConflict:"usuario_id,partido_id"});
+  const {error} = await db
+    .from("pronosticos")
+    .insert({
+      usuario_id: usuario.id,
+      partido_id: partidoId,
+      goles_a: Number(golesA),
+      goles_b: Number(golesB),
+      actualizado_en: new Date().toISOString()
+    });
 
-  if(error){ alert("Error: " + error.message); return; }
+  if(error){
+    alert("Error: " + error.message);
+    return;
+  }
 
-  alert("Pronóstico guardado.");
+  alert("Pronóstico guardado. Ya no podrá modificarlo.");
   cargarTodo();
 }
 
@@ -318,72 +452,140 @@ async function guardarResultado(partidoId){
   const golesA = document.getElementById("ra_" + partidoId).value;
   const golesB = document.getElementById("rb_" + partidoId).value;
 
-  if(golesA === "" || golesB === ""){ alert("Ingrese ambos resultados."); return; }
+  if(golesA === "" || golesB === ""){
+    alert("Ingrese ambos resultados.");
+    return;
+  }
 
-  const {error} = await db.from("partidos").update({
-    goles_a:Number(golesA),
-    goles_b:Number(golesB),
-    cerrado:true
-  }).eq("id", partidoId);
+  const {error} = await db
+    .from("partidos")
+    .update({
+      goles_a:Number(golesA),
+      goles_b:Number(golesB),
+      cerrado:true
+    })
+    .eq("id", partidoId);
 
-  if(error){ alert("Error: " + error.message); return; }
+  if(error){
+    alert("Error: " + error.message);
+    return;
+  }
 
   await calcularPuntos(partidoId);
+
   alert("Resultado guardado y puntos calculados.");
   cargarTodo();
 }
 
 async function calcularPuntos(partidoId){
-  const {data:partido} = await db.from("partidos").select("*").eq("id", partidoId).single();
-  const {data:pronosticos} = await db.from("pronosticos").select("*").eq("partido_id", partidoId);
+  const {data:partido} = await db
+    .from("partidos")
+    .select("*")
+    .eq("id", partidoId)
+    .single();
+
+  const {data:pronosticos} = await db
+    .from("pronosticos")
+    .select("*")
+    .eq("partido_id", partidoId);
 
   if(!partido || !pronosticos) return;
 
   for(const pr of pronosticos){
     let puntos = 0;
 
-    const exacto = pr.goles_a === partido.goles_a && pr.goles_b === partido.goles_b;
+    const exacto =
+      pr.goles_a === partido.goles_a &&
+      pr.goles_b === partido.goles_b;
 
-    const resultadoPronostico = pr.goles_a > pr.goles_b ? "A" : pr.goles_a < pr.goles_b ? "B" : "E";
-    const resultadoReal = partido.goles_a > partido.goles_b ? "A" : partido.goles_a < partido.goles_b ? "B" : "E";
+    const resultadoPronostico =
+      pr.goles_a > pr.goles_b ? "A" :
+      pr.goles_a < pr.goles_b ? "B" : "E";
+
+    const resultadoReal =
+      partido.goles_a > partido.goles_b ? "A" :
+      partido.goles_a < partido.goles_b ? "B" : "E";
 
     if(exacto) puntos = 3;
     else if(resultadoPronostico === resultadoReal) puntos = 1;
 
-    await db.from("pronosticos").update({puntos}).eq("id", pr.id);
+    await db
+      .from("pronosticos")
+      .update({puntos})
+      .eq("id", pr.id);
   }
 }
 
 async function cargarRanking(){
   const fecha = document.getElementById("fecha").value;
 
-  const {data} = await db.from("pronosticos").select(`
-    puntos,
-    usuarios(nombre),
-    partidos(fecha)
-  `).eq("partidos.fecha", fecha);
+  const {data,error} = await db
+    .from("pronosticos")
+    .select(`
+      puntos,
+      goles_a,
+      goles_b,
+      usuarios(nombre),
+      partidos(fecha, equipo_a, equipo_b, goles_a, goles_b)
+    `)
+    .eq("partidos.fecha", fecha);
 
-  const acumulado = {};
+  const tbody = document.getElementById("ranking");
+  tbody.innerHTML = "";
+
+  if(error){
+    tbody.innerHTML = "<tr><td colspan='4'>Error cargando ranking.</td></tr>";
+    return;
+  }
+
+  const usuarios = {};
 
   if(data){
     data.forEach(item=>{
       if(!item.usuarios || !item.partidos) return;
+
       const nombre = item.usuarios.nombre;
-      acumulado[nombre] = (acumulado[nombre] || 0) + item.puntos;
+
+      if(!usuarios[nombre]){
+        usuarios[nombre] = {
+          puntos: 0,
+          detalle: []
+        };
+      }
+
+      usuarios[nombre].puntos += item.puntos || 0;
+
+      const resultado =
+        item.partidos.goles_a === null
+          ? "pendiente"
+          : item.partidos.goles_a + "-" + item.partidos.goles_b;
+
+      usuarios[nombre].detalle.push(
+        `${item.partidos.equipo_a} vs ${item.partidos.equipo_b}: ` +
+        `pronóstico ${item.goles_a}-${item.goles_b}, ` +
+        `resultado ${resultado}, ` +
+        `${item.puntos || 0} pts`
+      );
     });
   }
 
-  const ranking = Object.entries(acumulado).sort((a,b)=>b[1]-a[1]);
-  const tbody = document.getElementById("ranking");
-  tbody.innerHTML = "";
+  const ranking = Object.entries(usuarios)
+    .sort((a,b)=>b[1].puntos-a[1].puntos);
 
   if(ranking.length === 0){
-    tbody.innerHTML = "<tr><td colspan='3'>No hay puntos registrados todavía.</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='4'>No hay puntos registrados todavía.</td></tr>";
     return;
   }
 
   ranking.forEach((r,index)=>{
-    tbody.innerHTML += `<tr><td>${index + 1}</td><td>${r[0]}</td><td>${r[1]}</td></tr>`;
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${r[0]}</td>
+        <td><strong>${r[1].puntos}</strong></td>
+        <td>${r[1].detalle.join("<br>")}</td>
+      </tr>
+    `;
   });
 }
 
