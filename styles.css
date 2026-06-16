@@ -142,12 +142,49 @@ td,th{
 }
 
 @media(max-width:750px){
-  .grid,.score,.nav{
+
+  .app{
+    padding:12px;
+  }
+
+  .hero{
+    padding:22px;
+    border-radius:16px;
+  }
+
+  .hero h1{
+    font-size:28px;
+  }
+
+  .card{
+    padding:18px;
+    border-radius:14px;
+  }
+
+  .grid,
+  .score,
+  .nav{
     display:grid;
     grid-template-columns:1fr;
   }
 
-  .hero h1{
-    font-size:30px;
+  .nav button{
+    width:100%;
+  }
+
+  input,
+  button{
+    width:100%;
+    font-size:16px;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+
+  .match-title{
+    font-size:18px;
   }
 }
