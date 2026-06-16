@@ -10,23 +10,22 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #06141f, #102a43);
+  background: #0f172a;
   color: #111827;
 }
 
 .app {
   max-width: 1100px;
   margin: auto;
-  padding: 30px 15px;
+  padding: 25px;
 }
 
 .hero {
-  background: linear-gradient(135deg, #003566, #0077b6);
+  background: linear-gradient(135deg, #0f766e, #1d4ed8);
   color: white;
-  padding: 35px;
-  border-radius: 22px;
-  margin-bottom: 25px;
-  box-shadow: 0 15px 35px rgba(0,0,0,.35);
+  padding: 30px;
+  border-radius: 20px;
+  margin-bottom: 20px;
 }
 
 .hero h1 {
@@ -34,31 +33,63 @@ body {
   font-size: 40px;
 }
 
-.hero p {
-  margin-top: 10px;
-  opacity: .9;
-}
-
 .card {
   background: white;
-  border-radius: 18px;
   padding: 25px;
-  margin-bottom: 22px;
-  box-shadow: 0 12px 28px rgba(0,0,0,.22);
+  border-radius: 18px;
+  margin-bottom: 20px;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.nav button {
+  flex: 1;
+  background: #1e3a8a;
+}
+
+input, button {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+}
+
+button {
+  background: #1d4ed8;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #1e40af;
+}
+
+.green {
+  background: #0f766e;
+}
+
+.red {
+  background: #991b1b;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
 }
 
 .match {
-  border: 1px solid #e5e7eb;
+  background: #f8fafc;
   padding: 18px;
   border-radius: 14px;
+  border: 1px solid #e5e7eb;
   margin-bottom: 15px;
-  background: #f9fafb;
 }
 
 .match-title {
@@ -74,37 +105,12 @@ body {
   align-items: center;
 }
 
-input, select {
-  padding: 13px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  font-size: 15px;
-}
-
-button {
-  padding: 13px 18px;
-  border: none;
-  background: #00509d;
-  color: white;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #003f7d;
-}
-
-.secondary {
-  background: #0f766e;
-}
-
-.secondary:hover {
-  background: #115e59;
-}
-
-.danger {
-  background: #991b1b;
+.notice {
+  background: #eff6ff;
+  border-left: 5px solid #2563eb;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
 }
 
 table {
@@ -113,27 +119,28 @@ table {
 }
 
 th {
-  background: #003566;
+  background: #1e3a8a;
   color: white;
 }
 
-th, td {
+td, th {
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
 }
 
-.notice {
-  background: #eff6ff;
-  padding: 12px;
-  border-left: 5px solid #2563eb;
-  border-radius: 8px;
-  margin-top: 10px;
+.vista {
+  display: none;
+}
+
+.vista.activa {
+  display: block;
 }
 
 @media(max-width: 750px) {
-  .grid, .score {
+  .grid, .score, .nav {
     grid-template-columns: 1fr;
+    display: grid;
   }
 
   .hero h1 {
@@ -149,59 +156,72 @@ th, td {
 
   <div class="hero">
     <h1>Quiniela Boboty</h1>
-    <p>Pronósticos diarios, resultados y ranking automático.</p>
+    <p>Pronósticos diarios, resultados y ranking automático</p>
   </div>
 
-  <div class="card">
-    <h2>Usuario</h2>
+  <div class="card" id="loginCard">
+    <h2>Ingreso de usuario</h2>
     <div class="grid">
-      <input id="nombreUsuario" placeholder="Escriba su nombre">
-      <button onclick="usarUsuario()">Entrar</button>
+      <input id="nombreUsuario" placeholder="Nombre">
+      <input id="pinUsuario" type="password" placeholder="PIN">
+      <button onclick="entrar()">Entrar / Registrarse</button>
     </div>
-    <div id="usuarioActivo" class="notice"></div>
+    <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN. Si es nuevo, se creará automáticamente.</div>
   </div>
 
-  <div class="card">
-    <h2>Fecha de la jornada</h2>
-    <div class="grid">
-      <input type="date" id="fecha" onchange="cargarTodo()">
-      <button class="secondary" onclick="cargarTodo()">Cargar jornada</button>
+  <div class="nav">
+    <button onclick="mostrarVista('pronosticos')">Pronósticos</button>
+    <button onclick="mostrarVista('ranking')">Ranking</button>
+    <button id="btnAdmin" onclick="mostrarVista('admin')" style="display:none;">Administración</button>
+  </div>
+
+  <section id="vista-pronosticos" class="vista activa">
+    <div class="card">
+      <h2>Fecha de la jornada</h2>
+      <div class="grid">
+        <input type="date" id="fecha" onchange="cargarTodo()">
+        <button class="green" onclick="cargarTodo()">Cargar jornada</button>
+      </div>
     </div>
-  </div>
 
-  <div class="card">
-    <h2>Partidos del día</h2>
-    <div id="partidos"></div>
-  </div>
-
-  <div class="card">
-    <h2>Ranking diario</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Posición</th>
-          <th>Usuario</th>
-          <th>Puntos</th>
-        </tr>
-      </thead>
-      <tbody id="ranking"></tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2>Administrador: crear partido</h2>
-    <div class="score">
-      <input id="adminLocal" placeholder="Equipo local">
-      <input id="adminVisitante" placeholder="Equipo visitante">
-      <input id="adminFecha" type="date">
-      <button onclick="crearPartido()">Crear</button>
+    <div class="card">
+      <h2>Partidos del día</h2>
+      <div id="partidos"></div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>Administrador: registrar resultado</h2>
-    <div id="adminResultados"></div>
-  </div>
+  <section id="vista-ranking" class="vista">
+    <div class="card">
+      <h2>Ranking diario</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Usuario</th>
+            <th>Puntos</th>
+          </tr>
+        </thead>
+        <tbody id="ranking"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="vista-admin" class="vista">
+    <div class="card">
+      <h2>Crear partido</h2>
+      <div class="grid">
+        <input id="adminLocal" placeholder="Equipo local">
+        <input id="adminVisitante" placeholder="Equipo visitante">
+        <input id="adminFecha" type="date">
+        <button onclick="crearPartido()">Crear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Registrar resultado oficial</h2>
+      <div id="adminResultados"></div>
+    </div>
+  </section>
 
 </div>
 
@@ -216,11 +236,17 @@ let usuario = null;
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 document.getElementById("adminFecha").value = document.getElementById("fecha").value;
 
-async function usarUsuario() {
-  const nombre = document.getElementById("nombreUsuario").value.trim();
+function mostrarVista(nombre) {
+  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
+  document.getElementById("vista-" + nombre).classList.add("activa");
+}
 
-  if (!nombre) {
-    alert("Escriba su nombre");
+async function entrar() {
+  const nombre = document.getElementById("nombreUsuario").value.trim();
+  const pin = document.getElementById("pinUsuario").value.trim();
+
+  if (!nombre || !pin) {
+    alert("Ingrese nombre y PIN.");
     return;
   }
 
@@ -228,29 +254,42 @@ async function usarUsuario() {
     .from("usuarios")
     .select("*")
     .eq("nombre", nombre)
-    .single();
+    .maybeSingle();
 
   if (!data) {
     const nuevo = await supabase
       .from("usuarios")
-      .insert({ nombre })
+      .insert({ nombre, pin, rol: "usuario" })
       .select()
       .single();
 
     data = nuevo.data;
     error = nuevo.error;
+  } else {
+    if (data.pin !== pin) {
+      alert("PIN incorrecto.");
+      return;
+    }
   }
 
   if (error) {
-    alert("Error al crear o cargar usuario: " + error.message);
+    alert("Error: " + error.message);
     return;
   }
 
   usuario = data;
-  localStorage.setItem("usuarioNombre", nombre);
+
+  localStorage.setItem("nombreUsuario", nombre);
+  localStorage.setItem("pinUsuario", pin);
 
   document.getElementById("usuarioActivo").innerText =
     "Usuario activo: " + usuario.nombre;
+
+  if (usuario.rol === "admin") {
+    document.getElementById("btnAdmin").style.display = "block";
+  } else {
+    document.getElementById("btnAdmin").style.display = "none";
+  }
 
   cargarTodo();
 }
@@ -302,6 +341,7 @@ async function cargarPartidos() {
     contenedor.innerHTML += `
       <div class="match">
         <div class="match-title">${p.equipo_local} vs ${p.equipo_visitante}</div>
+
         <div class="notice">
           Resultado oficial:
           ${p.goles_local === null ? "Pendiente" : p.goles_local + " - " + p.goles_visitante}
@@ -311,7 +351,9 @@ async function cargarPartidos() {
           <div>Su pronóstico</div>
           <input id="pl_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_local : ""}">
           <input id="pv_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_visitante : ""}">
-          <button onclick="guardarPronostico(${p.id})">Guardar / Actualizar</button>
+          <button onclick="guardarPronostico(${p.id}, ${p.cerrado})">
+            Guardar / Actualizar
+          </button>
         </div>
       </div>
     `;
@@ -319,20 +361,26 @@ async function cargarPartidos() {
     admin.innerHTML += `
       <div class="match">
         <div class="match-title">${p.equipo_local} vs ${p.equipo_visitante}</div>
+
         <div class="score">
           <div>Resultado oficial</div>
           <input id="rl_${p.id}" type="number" min="0" value="${p.goles_local ?? ""}">
           <input id="rv_${p.id}" type="number" min="0" value="${p.goles_visitante ?? ""}">
-          <button class="secondary" onclick="guardarResultado(${p.id})">Guardar resultado</button>
+          <button class="green" onclick="guardarResultado(${p.id})">Guardar resultado</button>
         </div>
       </div>
     `;
   }
 }
 
-async function guardarPronostico(partidoId) {
+async function guardarPronostico(partidoId, cerrado) {
   if (!usuario) {
     alert("Primero debe ingresar su usuario.");
+    return;
+  }
+
+  if (cerrado) {
+    alert("Este partido ya está cerrado. No se puede modificar el pronóstico.");
     return;
   }
 
@@ -366,6 +414,11 @@ async function guardarPronostico(partidoId) {
 }
 
 async function crearPartido() {
+  if (!usuario || usuario.rol !== "admin") {
+    alert("Solo el administrador puede crear partidos.");
+    return;
+  }
+
   const equipo_local = document.getElementById("adminLocal").value.trim();
   const equipo_visitante = document.getElementById("adminVisitante").value.trim();
   const fecha = document.getElementById("adminFecha").value;
@@ -377,14 +430,10 @@ async function crearPartido() {
 
   const { error } = await supabase
     .from("partidos")
-    .insert({
-      equipo_local,
-      equipo_visitante,
-      fecha
-    });
+    .insert({ equipo_local, equipo_visitante, fecha });
 
   if (error) {
-    alert("Error al crear partido: " + error.message);
+    alert("Error: " + error.message);
     return;
   }
 
@@ -396,6 +445,11 @@ async function crearPartido() {
 }
 
 async function guardarResultado(partidoId) {
+  if (!usuario || usuario.rol !== "admin") {
+    alert("Solo el administrador puede registrar resultados.");
+    return;
+  }
+
   const golesLocal = document.getElementById("rl_" + partidoId).value;
   const golesVisitante = document.getElementById("rv_" + partidoId).value;
 
@@ -414,7 +468,7 @@ async function guardarResultado(partidoId) {
     .eq("id", partidoId);
 
   if (error) {
-    alert("Error al guardar resultado: " + error.message);
+    alert("Error: " + error.message);
     return;
   }
 
@@ -476,7 +530,8 @@ async function cargarRanking() {
 
   if (data) {
     data.forEach(item => {
-      if (!item.usuarios) return;
+      if (!item.usuarios || !item.partidos) return;
+
       const nombre = item.usuarios.nombre;
       acumulado[nombre] = (acumulado[nombre] || 0) + item.puntos;
     });
@@ -504,9 +559,12 @@ async function cargarRanking() {
   });
 }
 
-const usuarioGuardado = localStorage.getItem("usuarioNombre");
-if (usuarioGuardado) {
-  document.getElementById("nombreUsuario").value = usuarioGuardado;
+const nombreGuardado = localStorage.getItem("nombreUsuario");
+const pinGuardado = localStorage.getItem("pinUsuario");
+
+if (nombreGuardado && pinGuardado) {
+  document.getElementById("nombreUsuario").value = nombreGuardado;
+  document.getElementById("pinUsuario").value = pinGuardado;
 }
 
 cargarTodo();
