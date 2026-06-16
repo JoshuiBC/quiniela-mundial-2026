@@ -143,48 +143,45 @@ td,th{
 
 @media(max-width:750px){
 
-  .app{
-    padding:12px;
-  }
-
-  .hero{
-    padding:22px;
-    border-radius:16px;
-  }
-
-  .hero h1{
-    font-size:28px;
-  }
-
-  .card{
-    padding:18px;
-    border-radius:14px;
-  }
-
-  .grid,
-  .score,
-  .nav{
-    display:grid;
-    grid-template-columns:1fr;
-  }
-
-  .nav button{
-    width:100%;
-  }
-
-  input,
-  button{
-    width:100%;
-    font-size:16px;
-  }
-
-  table{
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr{
     display:block;
-    overflow-x:auto;
-    white-space:nowrap;
+    width:100%;
   }
 
-  .match-title{
-    font-size:18px;
+  thead{
+    display:none;
+  }
+
+  tr{
+    background:#ffffff;
+    margin-bottom:15px;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:10px;
+  }
+
+  td{
+    border:none;
+    border-bottom:1px solid #e5e7eb;
+    padding:10px;
+    white-space:normal;
+    word-break:break-word;
+  }
+
+  td:last-child{
+    border-bottom:none;
+  }
+
+  td::before{
+    content:attr(data-label);
+    display:block;
+    font-weight:bold;
+    color:#1e3a8a;
+    margin-bottom:5px;
   }
 }
