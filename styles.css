@@ -1,15 +1,21 @@
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-body{
+html,body{
   margin:0;
+  padding:0;
+  width:100%;
+  overflow-x:hidden;
   font-family:Arial,sans-serif;
   background:#0f172a;
   color:#111827;
 }
 
 .app{
+  width:100%;
   max-width:1200px;
-  margin:auto;
+  margin:0 auto;
   padding:25px;
 }
 
@@ -44,7 +50,15 @@ body{
   flex:1;
 }
 
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:10px;
+}
+
 input,button{
+  width:100%;
+  min-width:0;
   padding:12px;
   border-radius:10px;
   border:1px solid #cbd5e1;
@@ -71,10 +85,9 @@ button:hover{
   background:#991b1b;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr auto;
-  gap:10px;
+.logout{
+  margin-top:10px;
+  display:none;
 }
 
 .match{
@@ -136,12 +149,37 @@ td,th{
   display:block;
 }
 
-.logout{
-  margin-top:10px;
-  display:none;
-}
-
 @media(max-width:750px){
+
+  .app{
+    padding:12px;
+  }
+
+  .hero{
+    padding:22px;
+    border-radius:16px;
+  }
+
+  .hero h1{
+    font-size:28px;
+    word-break:break-word;
+  }
+
+  .card{
+    padding:16px;
+    border-radius:14px;
+  }
+
+  .grid,
+  .score,
+  .nav{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .match-title{
+    font-size:18px;
+  }
 
   table,
   thead,
