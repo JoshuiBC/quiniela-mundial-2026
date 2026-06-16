@@ -31,7 +31,7 @@ th{background:#1e3a8a;color:white}
 td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
 .vista{display:none}
 .vista.activa{display:block}
-.logout{margin-top:10px}
+.logout{margin-top:10px;display:none}
 @media(max-width:750px){
   .grid,.score,.nav{display:grid;grid-template-columns:1fr}
   .hero h1{font-size:30px}
@@ -55,13 +55,11 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-alig
     <input id="pinUsuario" type="password" placeholder="PIN">
     <button onclick="entrar()">Entrar / Registrarse</button>
   </div>
-  <button
-  id="btnCerrarSesion"
-  class="red logout"
-  onclick="cerrarSesion()"
-  style="display:none;">
-  Cerrar sesión
-</button>
+
+  <button id="btnCerrarSesion" class="red logout" onclick="cerrarSesion()">
+    Cerrar sesión
+  </button>
+
   <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN.</div>
 </div>
 
@@ -133,8 +131,31 @@ function mostrarVista(nombre){
   document.getElementById("vista-" + nombre).classList.add("activa");
 }
 
-function cerrarSesion(){
+function mostrarBotonCerrarSesion(){
+  document.getElementById("btnCerrarSesion").style.display = "inline-block";
+}
 
+function ocultarBotonCerrarSesion(){
+  document.getElementById("btnCerrarSesion").style.display = "none";
+}
+
+function cerrarSesion(){
+  usuario = null;
+
+  localStorage.removeItem("nombreUsuario");
+  localStorage.removeItem("pinUsuario");
+
+  document.getElementById("nombreUsuario").value = "";
+  document.getElementById("pinUsuario").value = "";
+
+  document.getElementById("usuarioActivo").innerText = "Ingrese su nombre y PIN.";
+
+  document.getElementById("btnAdmin").style.display = "none";
+  ocultarBotonCerrarSesion();
+
+  mostrarVista("pronosticos");
+  cargarTodo();
+}
 
 async function entrar(){
   const nombre = document.getElementById("nombreUsuario").value.trim();
@@ -177,13 +198,15 @@ async function entrar(){
   localStorage.setItem("nombreUsuario", nombre);
   localStorage.setItem("pinUsuario", pin);
 
-document.getElementById("usuarioActivo").innerText =
-  "Usuario activo: " + usuario.nombre;
+  document.getElementById("usuarioActivo").innerText =
+    "Usuario activo: " + usuario.nombre;
 
-document.getElementById("btnCerrarSesion").style.display = "block";
+  mostrarBotonCerrarSesion();
 
-document.getElementById("btnAdmin").style.display =
-  usuario.rol === "admin" ? "block" : "none";
+  document.getElementById("btnAdmin").style.display =
+    usuario.rol === "admin" ? "block" : "none";
+
+  cargarTodo();
 }
 
 function normalizarFecha(valor){
@@ -591,8 +614,7 @@ const pinGuardado = localStorage.getItem("pinUsuario");
 if(nombreGuardado && pinGuardado){
   document.getElementById("nombreUsuario").value = nombreGuardado;
   document.getElementById("pinUsuario").value = pinGuardado;
-
-  document.getElementById("btnCerrarSesion").style.display = "block";
+  mostrarBotonCerrarSesion();
 }
 
 cargarTodo();
