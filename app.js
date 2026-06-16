@@ -11,13 +11,8 @@ function mostrarVista(nombre){
   document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
   document.getElementById("vista-" + nombre).classList.add("activa");
 
-  if(nombre === "estadisticas"){
-    cargarRanking();
-  }
-
-  if(nombre === "admin"){
-    cargarPartidos();
-  }
+  if(nombre === "estadisticas") cargarRanking();
+  if(nombre === "admin") cargarPartidos();
 }
 
 function mostrarBotonCerrarSesion(){
@@ -30,17 +25,15 @@ function ocultarBotonCerrarSesion(){
 
 function cerrarSesion(){
   usuario = null;
-
   localStorage.removeItem("nombreUsuario");
   localStorage.removeItem("pinUsuario");
 
   document.getElementById("nombreUsuario").value = "";
   document.getElementById("pinUsuario").value = "";
   document.getElementById("usuarioActivo").innerText = "Ingrese su nombre y PIN.";
-
   document.getElementById("btnAdmin").style.display = "none";
-  ocultarBotonCerrarSesion();
 
+  ocultarBotonCerrarSesion();
   mostrarVista("inicio");
   cargarTodo();
 }
@@ -69,11 +62,9 @@ async function entrar(){
 
     data = nuevo.data;
     error = nuevo.error;
-  }else{
-    if(data.pin !== pin){
-      alert("PIN incorrecto.");
-      return;
-    }
+  }else if(data.pin !== pin){
+    alert("PIN incorrecto.");
+    return;
   }
 
   if(error){
@@ -493,10 +484,10 @@ async function cargarRankingDiario(){
   ranking.forEach((r,index)=>{
     tbody.innerHTML += `
       <tr>
-        <td>${index + 1}</td>
-        <td>${r[0]}</td>
-        <td><strong>${r[1].puntos}</strong></td>
-        <td>${r[1].detalle.join("<br>")}</td>
+        <td data-label="Posición">${index + 1}</td>
+        <td data-label="Usuario">${r[0]}</td>
+        <td data-label="Puntos del día"><strong>${r[1].puntos}</strong></td>
+        <td data-label="Detalle">${r[1].detalle.join("<br>")}</td>
       </tr>
     `;
   });
@@ -546,10 +537,10 @@ async function cargarRankingGlobal(){
   ranking.forEach((r,index)=>{
     tbody.innerHTML += `
       <tr>
-        <td>${index + 1}</td>
-        <td>${r[0]}</td>
-        <td><strong>${r[1].puntos}</strong></td>
-        <td>${r[1].pronosticos}</td>
+        <td data-label="Posición">${index + 1}</td>
+        <td data-label="Usuario">${r[0]}</td>
+        <td data-label="Puntos globales"><strong>${r[1].puntos}</strong></td>
+        <td data-label="Pronósticos">${r[1].pronosticos}</td>
       </tr>
     `;
   });
@@ -610,10 +601,10 @@ async function cargarEstadisticas(){
   ranking.forEach(r=>{
     tbody.innerHTML += `
       <tr>
-        <td>${r[0]}</td>
-        <td>${r[1].exactos}</td>
-        <td>${r[1].resultados}</td>
-        <td><strong>${r[1].puntos}</strong></td>
+        <td data-label="Usuario">${r[0]}</td>
+        <td data-label="Marcadores exactos">${r[1].exactos}</td>
+        <td data-label="Resultados acertados">${r[1].resultados}</td>
+        <td data-label="Total puntos"><strong>${r[1].puntos}</strong></td>
       </tr>
     `;
   });
