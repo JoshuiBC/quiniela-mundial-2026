@@ -5,37 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiniela Boboty</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#111827}
 .app{max-width:1100px;margin:auto;padding:25px}
 .hero{background:linear-gradient(135deg,#0f766e,#1d4ed8);color:white;padding:30px;border-radius:20px;margin-bottom:20px}
-.hero h1{margin:0;font-size:40px}
-.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px}
-.nav{display:flex;gap:10px;margin-bottom:20px}
-.nav button{flex:1}
+.hero h1{margin:0;font-size:40px}.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px}
+.nav{display:flex;gap:10px;margin-bottom:20px}.nav button{flex:1}
 input,button{padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px}
 button{background:#1d4ed8;color:white;border:none;cursor:pointer;font-weight:bold}
-button:hover{background:#1e40af}
-.green{background:#0f766e}
+button:hover{background:#1e40af}.green{background:#0f766e}
 .grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
 .match{background:#f8fafc;padding:18px;border-radius:14px;border:1px solid #e5e7eb;margin-bottom:15px}
 .match-title{font-size:20px;font-weight:bold;margin-bottom:10px}
 .score{display:grid;grid-template-columns:1fr 90px 90px auto;gap:10px;align-items:center}
 .notice{background:#eff6ff;border-left:5px solid #2563eb;padding:10px;border-radius:8px;margin:10px 0}
-table{width:100%;border-collapse:collapse}
-th{background:#1e3a8a;color:white}
+table{width:100%;border-collapse:collapse}th{background:#1e3a8a;color:white}
 td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
-.vista{display:none}
-.vista.activa{display:block}
-@media(max-width:750px){
-  .grid,.score,.nav{display:grid;grid-template-columns:1fr}
-  .hero h1{font-size:30px}
-}
+.vista{display:none}.vista.activa{display:block}
+@media(max-width:750px){.grid,.score,.nav{display:grid;grid-template-columns:1fr}.hero h1{font-size:30px}}
 </style>
 </head>
-
 <body>
 
 <div class="app">
@@ -52,9 +42,7 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
     <input id="pinUsuario" type="password" placeholder="PIN">
     <button onclick="entrar()">Entrar / Registrarse</button>
   </div>
-  <div id="usuarioActivo" class="notice">
-    Ingrese su nombre y PIN. Si es nuevo, se creará automáticamente.
-  </div>
+  <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN.</div>
 </div>
 
 <div class="nav">
@@ -71,7 +59,6 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
       <button class="green" onclick="cargarTodo()">Cargar jornada</button>
     </div>
   </div>
-
   <div class="card">
     <h2>Partidos del día</h2>
     <div id="partidos"></div>
@@ -82,13 +69,7 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
   <div class="card">
     <h2>Ranking diario</h2>
     <table>
-      <thead>
-        <tr>
-          <th>Posición</th>
-          <th>Usuario</th>
-          <th>Puntos</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Posición</th><th>Usuario</th><th>Puntos</th></tr></thead>
       <tbody id="ranking"></tbody>
     </table>
   </div>
@@ -96,11 +77,10 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
 
 <section id="vista-admin" class="vista">
   <div class="card">
-    <h2>Importar partidos</h2>
-    <p>Importa partidos base del Mundial 2026.</p>
-    <button class="green" onclick="importarPartidos()">Importar partidos</button>
+    <h2>Importar partidos desde API</h2>
+    <p>Importa partidos y resultados desde worldcup26.ir.</p>
+    <button class="green" onclick="importarPartidosAPI()">Importar / actualizar partidos</button>
   </div>
-
   <div class="card">
     <h2>Registrar resultados oficiales</h2>
     <div id="adminResultados"></div>
@@ -112,11 +92,9 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
 <script>
 const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
-
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuario = null;
-
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 
 function mostrarVista(nombre){
@@ -128,70 +106,122 @@ async function entrar(){
   const nombre = document.getElementById("nombreUsuario").value.trim();
   const pin = document.getElementById("pinUsuario").value.trim();
 
-  if(!nombre || !pin){
-    alert("Ingrese nombre y PIN.");
-    return;
-  }
+  if(!nombre || !pin){ alert("Ingrese nombre y PIN."); return; }
 
-  let {data,error} = await db
-    .from("usuarios")
-    .select("*")
-    .eq("nombre", nombre)
-    .maybeSingle();
+  let {data,error} = await db.from("usuarios").select("*").eq("nombre", nombre).maybeSingle();
 
   if(!data){
-    const nuevo = await db
-      .from("usuarios")
-      .insert({nombre, pin, rol:"usuario"})
-      .select()
-      .single();
-
+    const nuevo = await db.from("usuarios").insert({nombre, pin, rol:"usuario"}).select().single();
     data = nuevo.data;
     error = nuevo.error;
-  }else{
-    if(data.pin !== pin){
-      alert("PIN incorrecto.");
-      return;
-    }
-  }
-
-  if(error){
-    alert("Error: " + error.message);
+  } else if(data.pin !== pin){
+    alert("PIN incorrecto.");
     return;
   }
 
-  usuario = data;
+  if(error){ alert("Error: " + error.message); return; }
 
+  usuario = data;
   localStorage.setItem("nombreUsuario", nombre);
   localStorage.setItem("pinUsuario", pin);
 
-  document.getElementById("usuarioActivo").innerText =
-    "Usuario activo: " + usuario.nombre;
-
-  document.getElementById("btnAdmin").style.display =
-    usuario.rol === "admin" ? "block" : "none";
+  document.getElementById("usuarioActivo").innerText = "Usuario activo: " + usuario.nombre;
+  document.getElementById("btnAdmin").style.display = usuario.rol === "admin" ? "block" : "none";
 
   cargarTodo();
 }
 
-async function importarPartidos(){
+function normalizarFecha(valor){
+  if(!valor) return null;
+
+  if(/^\d{4}-\d{2}-\d{2}/.test(valor)){
+    return valor.slice(0,10);
+  }
+
+  if(valor.includes("/")){
+    const partes = valor.split(" ")[0].split("/");
+    if(partes.length === 3){
+      let a = partes[0], b = partes[1], c = partes[2];
+      if(c.length === 4){
+        return `${c}-${a.padStart(2,"0")}-${b.padStart(2,"0")}`;
+      }
+    }
+  }
+
+  const f = new Date(valor);
+  if(!isNaN(f)) return f.toISOString().slice(0,10);
+
+  return null;
+}
+
+function obtenerCampo(obj, opciones){
+  for(const k of opciones){
+    if(obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
+  }
+  return null;
+}
+
+async function importarPartidosAPI(){
   if(!usuario || usuario.rol !== "admin"){
     alert("Solo el administrador puede importar partidos.");
     return;
   }
 
-  const partidosPrueba = [
-    {id:"2026-001",fecha:"2026-06-11",equipo_a:"México",equipo_b:"Equipo por definir"},
-    {id:"2026-002",fecha:"2026-06-12",equipo_a:"Canadá",equipo_b:"Equipo por definir"},
-    {id:"2026-003",fecha:"2026-06-13",equipo_a:"Estados Unidos",equipo_b:"Equipo por definir"}
-  ];
+  try{
+    const resp = await fetch("https://worldcup26.ir/get/games");
+    const json = await resp.json();
 
-  for(const p of partidosPrueba){
-    await db.from("partidos").upsert(p,{onConflict:"id"});
+    const juegos = Array.isArray(json) ? json : (json.games || json.data || json.response || []);
+
+    if(!juegos.length){
+      console.log(json);
+      alert("La API respondió, pero no encontré la lista de partidos.");
+      return;
+    }
+
+    let importados = 0;
+
+    for(const g of juegos){
+      const id = String(obtenerCampo(g, ["id","game_id","match_id","_id"]));
+      const fechaRaw = obtenerCampo(g, ["local_date","date","match_date","datetime","utc_date"]);
+      const fecha = normalizarFecha(fechaRaw);
+
+      const equipoA = obtenerCampo(g, ["home_team_name_en","home_team","home","team_a","home_team_label"]) || "Equipo por definir";
+      const equipoB = obtenerCampo(g, ["away_team_name_en","away_team","away","team_b","away_team_label"]) || "Equipo por definir";
+
+      const marcadorA = obtenerCampo(g, ["home_score","home_goals","score_home","goals_home"]);
+      const marcadorB = obtenerCampo(g, ["away_score","away_goals","score_away","goals_away"]);
+
+      const finalizadoRaw = obtenerCampo(g, ["finished","is_finished","status","match_status"]);
+      const cerrado = finalizadoRaw === true ||
+                      finalizadoRaw === "TRUE" ||
+                      finalizadoRaw === "true" ||
+                      finalizadoRaw === "finished" ||
+                      finalizadoRaw === "FT";
+
+      if(!id || !fecha) continue;
+
+      await db.from("partidos").upsert({
+        id,
+        fecha,
+        equipo_a: equipoA,
+        equipo_b: equipoB,
+        goles_a: marcadorA === null ? null : Number(marcadorA),
+        goles_b: marcadorB === null ? null : Number(marcadorB),
+        cerrado
+      }, {onConflict:"id"});
+
+      if(cerrado) await calcularPuntos(id);
+      importados++;
+    }
+
+    alert("Partidos importados o actualizados: " + importados);
+    cargarTodo();
+
+  }catch(e){
+    console.error(e);
+    alert("No se pudo conectar con la API. Revise la consola.");
   }
-
-  alert("Partidos importados.");
-  cargarTodo();
 }
 
 async function cargarTodo(){
@@ -202,25 +232,18 @@ async function cargarTodo(){
 async function cargarPartidos(){
   const fecha = document.getElementById("fecha").value;
 
-  const {data:partidos,error} = await db
-    .from("partidos")
-    .select("*")
-    .eq("fecha", fecha)
-    .order("id", {ascending:true});
+  const {data:partidos,error} = await db.from("partidos")
+    .select("*").eq("fecha", fecha).order("id", {ascending:true});
 
   const contenedor = document.getElementById("partidos");
   const admin = document.getElementById("adminResultados");
-
   contenedor.innerHTML = "";
   admin.innerHTML = "";
 
-  if(error){
-    contenedor.innerHTML = "Error al cargar partidos.";
-    return;
-  }
+  if(error){ contenedor.innerHTML = "Error al cargar partidos."; return; }
 
   if(!partidos || partidos.length === 0){
-    contenedor.innerHTML = "No hay partidos para esta fecha.";
+    contenedor.innerHTML = "No hay partidos para esta fecha. Ingrese como administrador e importe desde la API.";
     admin.innerHTML = "No hay partidos para esta fecha.";
     return;
   }
@@ -229,13 +252,8 @@ async function cargarPartidos(){
     let pronostico = null;
 
     if(usuario){
-      const res = await db
-        .from("pronosticos")
-        .select("*")
-        .eq("usuario_id", usuario.id)
-        .eq("partido_id", p.id)
-        .maybeSingle();
-
+      const res = await db.from("pronosticos")
+        .select("*").eq("usuario_id", usuario.id).eq("partido_id", p.id).maybeSingle();
       pronostico = res.data;
     }
 
@@ -243,8 +261,7 @@ async function cargarPartidos(){
       <div class="match">
         <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
         <div class="notice">
-          Resultado oficial:
-          ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
+          Resultado oficial: ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
         </div>
         <div class="score">
           <div>Su pronóstico</div>
@@ -270,40 +287,23 @@ async function cargarPartidos(){
 }
 
 async function guardarPronostico(partidoId,cerrado){
-  if(!usuario){
-    alert("Primero debe ingresar su usuario.");
-    return;
-  }
-
-  if(cerrado){
-    alert("Este partido ya está cerrado.");
-    return;
-  }
+  if(!usuario){ alert("Primero debe ingresar su usuario."); return; }
+  if(cerrado){ alert("Este partido ya está cerrado."); return; }
 
   const golesA = document.getElementById("pa_" + partidoId).value;
   const golesB = document.getElementById("pb_" + partidoId).value;
 
-  if(golesA === "" || golesB === ""){
-    alert("Ingrese ambos marcadores.");
-    return;
-  }
+  if(golesA === "" || golesB === ""){ alert("Ingrese ambos marcadores."); return; }
 
-  const {error} = await db
-    .from("pronosticos")
-    .upsert({
-      usuario_id: usuario.id,
-      partido_id: partidoId,
-      goles_a: Number(golesA),
-      goles_b: Number(golesB),
-      actualizado_en: new Date().toISOString()
-    }, {
-      onConflict:"usuario_id,partido_id"
-    });
+  const {error} = await db.from("pronosticos").upsert({
+    usuario_id: usuario.id,
+    partido_id: partidoId,
+    goles_a: Number(golesA),
+    goles_b: Number(golesB),
+    actualizado_en: new Date().toISOString()
+  }, {onConflict:"usuario_id,partido_id"});
 
-  if(error){
-    alert("Error: " + error.message);
-    return;
-  }
+  if(error){ alert("Error: " + error.message); return; }
 
   alert("Pronóstico guardado.");
   cargarTodo();
@@ -318,79 +318,50 @@ async function guardarResultado(partidoId){
   const golesA = document.getElementById("ra_" + partidoId).value;
   const golesB = document.getElementById("rb_" + partidoId).value;
 
-  if(golesA === "" || golesB === ""){
-    alert("Ingrese ambos resultados.");
-    return;
-  }
+  if(golesA === "" || golesB === ""){ alert("Ingrese ambos resultados."); return; }
 
-  const {error} = await db
-    .from("partidos")
-    .update({
-      goles_a:Number(golesA),
-      goles_b:Number(golesB),
-      cerrado:true
-    })
-    .eq("id", partidoId);
+  const {error} = await db.from("partidos").update({
+    goles_a:Number(golesA),
+    goles_b:Number(golesB),
+    cerrado:true
+  }).eq("id", partidoId);
 
-  if(error){
-    alert("Error: " + error.message);
-    return;
-  }
+  if(error){ alert("Error: " + error.message); return; }
 
   await calcularPuntos(partidoId);
-
   alert("Resultado guardado y puntos calculados.");
   cargarTodo();
 }
 
 async function calcularPuntos(partidoId){
-  const {data:partido} = await db
-    .from("partidos")
-    .select("*")
-    .eq("id", partidoId)
-    .single();
+  const {data:partido} = await db.from("partidos").select("*").eq("id", partidoId).single();
+  const {data:pronosticos} = await db.from("pronosticos").select("*").eq("partido_id", partidoId);
 
-  const {data:pronosticos} = await db
-    .from("pronosticos")
-    .select("*")
-    .eq("partido_id", partidoId);
+  if(!partido || !pronosticos) return;
 
   for(const pr of pronosticos){
     let puntos = 0;
 
-    const exacto =
-      pr.goles_a === partido.goles_a &&
-      pr.goles_b === partido.goles_b;
+    const exacto = pr.goles_a === partido.goles_a && pr.goles_b === partido.goles_b;
 
-    const resultadoPronostico =
-      pr.goles_a > pr.goles_b ? "A" :
-      pr.goles_a < pr.goles_b ? "B" : "E";
-
-    const resultadoReal =
-      partido.goles_a > partido.goles_b ? "A" :
-      partido.goles_a < partido.goles_b ? "B" : "E";
+    const resultadoPronostico = pr.goles_a > pr.goles_b ? "A" : pr.goles_a < pr.goles_b ? "B" : "E";
+    const resultadoReal = partido.goles_a > partido.goles_b ? "A" : partido.goles_a < partido.goles_b ? "B" : "E";
 
     if(exacto) puntos = 3;
     else if(resultadoPronostico === resultadoReal) puntos = 1;
 
-    await db
-      .from("pronosticos")
-      .update({puntos})
-      .eq("id", pr.id);
+    await db.from("pronosticos").update({puntos}).eq("id", pr.id);
   }
 }
 
 async function cargarRanking(){
   const fecha = document.getElementById("fecha").value;
 
-  const {data} = await db
-    .from("pronosticos")
-    .select(`
-      puntos,
-      usuarios(nombre),
-      partidos(fecha)
-    `)
-    .eq("partidos.fecha", fecha);
+  const {data} = await db.from("pronosticos").select(`
+    puntos,
+    usuarios(nombre),
+    partidos(fecha)
+  `).eq("partidos.fecha", fecha);
 
   const acumulado = {};
 
@@ -402,9 +373,7 @@ async function cargarRanking(){
     });
   }
 
-  const ranking = Object.entries(acumulado)
-    .sort((a,b)=>b[1]-a[1]);
-
+  const ranking = Object.entries(acumulado).sort((a,b)=>b[1]-a[1]);
   const tbody = document.getElementById("ranking");
   tbody.innerHTML = "";
 
@@ -414,13 +383,7 @@ async function cargarRanking(){
   }
 
   ranking.forEach((r,index)=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-      </tr>
-    `;
+    tbody.innerHTML += `<tr><td>${index + 1}</td><td>${r[0]}</td><td>${r[1]}</td></tr>`;
   });
 }
 
