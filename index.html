@@ -7,145 +7,105 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: #111827;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0f172a;
+  color:#111827;
 }
-
-.app {
-  max-width: 1100px;
-  margin: auto;
-  padding: 25px;
+.app{
+  max-width:1100px;
+  margin:auto;
+  padding:25px;
 }
-
-.hero {
-  background: linear-gradient(135deg, #0f766e, #1d4ed8);
-  color: white;
-  padding: 30px;
-  border-radius: 20px;
-  margin-bottom: 20px;
+.hero{
+  background:linear-gradient(135deg,#0f766e,#1d4ed8);
+  color:white;
+  padding:30px;
+  border-radius:20px;
+  margin-bottom:20px;
 }
-
-.hero h1 {
-  margin: 0;
-  font-size: 40px;
+.hero h1{margin:0;font-size:40px}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  margin-bottom:20px;
 }
-
-.card {
-  background: white;
-  padding: 25px;
-  border-radius: 18px;
-  margin-bottom: 20px;
+.nav{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
-
-.nav {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+.nav button{flex:1}
+input,button{
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #cbd5e1;
+  font-size:15px;
 }
-
-.nav button {
-  flex: 1;
-  background: #1e3a8a;
+button{
+  background:#1d4ed8;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
 }
-
-input, button {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  font-size: 15px;
+button:hover{background:#1e40af}
+.green{background:#0f766e}
+.red{background:#991b1b}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:10px;
 }
-
-button {
-  background: #1d4ed8;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
+.match{
+  background:#f8fafc;
+  padding:18px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+  margin-bottom:15px;
 }
-
-button:hover {
-  background: #1e40af;
+.match-title{
+  font-size:20px;
+  font-weight:bold;
+  margin-bottom:10px;
 }
-
-.green {
-  background: #0f766e;
+.score{
+  display:grid;
+  grid-template-columns:1fr 90px 90px auto;
+  gap:10px;
+  align-items:center;
 }
-
-.red {
-  background: #991b1b;
+.notice{
+  background:#eff6ff;
+  border-left:5px solid #2563eb;
+  padding:10px;
+  border-radius:8px;
+  margin:10px 0;
 }
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 10px;
+table{
+  width:100%;
+  border-collapse:collapse;
 }
-
-.match {
-  background: #f8fafc;
-  padding: 18px;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 15px;
+th{
+  background:#1e3a8a;
+  color:white;
 }
-
-.match-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
+td,th{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
 }
-
-.score {
-  display: grid;
-  grid-template-columns: 1fr 90px 90px auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.notice {
-  background: #eff6ff;
-  border-left: 5px solid #2563eb;
-  padding: 10px;
-  border-radius: 8px;
-  margin: 10px 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background: #1e3a8a;
-  color: white;
-}
-
-td, th {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
-}
-
-.vista {
-  display: none;
-}
-
-.vista.activa {
-  display: block;
-}
-
-@media(max-width: 750px) {
-  .grid, .score, .nav {
-    grid-template-columns: 1fr;
-    display: grid;
+.vista{display:none}
+.vista.activa{display:block}
+@media(max-width:750px){
+  .grid,.score,.nav{
+    display:grid;
+    grid-template-columns:1fr;
   }
-
-  .hero h1 {
-    font-size: 30px;
-  }
+  .hero h1{font-size:30px}
 }
 </style>
 </head>
@@ -154,74 +114,72 @@ td, th {
 
 <div class="app">
 
-  <div class="hero">
-    <h1>Quiniela Boboty</h1>
-    <p>Pronósticos diarios, resultados y ranking automático</p>
-  </div>
+<div class="hero">
+  <h1>Quiniela Boboty</h1>
+  <p>Pronósticos diarios, resultados y ranking automático</p>
+</div>
 
-  <div class="card" id="loginCard">
-    <h2>Ingreso de usuario</h2>
+<div class="card">
+  <h2>Ingreso de usuario</h2>
+  <div class="grid">
+    <input id="nombreUsuario" placeholder="Nombre">
+    <input id="pinUsuario" type="password" placeholder="PIN">
+    <button onclick="entrar()">Entrar / Registrarse</button>
+  </div>
+  <div id="usuarioActivo" class="notice">
+    Ingrese su nombre y PIN. Si es nuevo, se creará automáticamente.
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="mostrarVista('pronosticos')">Pronósticos</button>
+  <button onclick="mostrarVista('ranking')">Ranking</button>
+  <button id="btnAdmin" onclick="mostrarVista('admin')" style="display:none;">Administración</button>
+</div>
+
+<section id="vista-pronosticos" class="vista activa">
+  <div class="card">
+    <h2>Fecha de la jornada</h2>
     <div class="grid">
-      <input id="nombreUsuario" placeholder="Nombre">
-      <input id="pinUsuario" type="password" placeholder="PIN">
-      <button onclick="entrar()">Entrar / Registrarse</button>
+      <input type="date" id="fecha" onchange="cargarTodo()">
+      <button class="green" onclick="cargarTodo()">Cargar jornada</button>
     </div>
-    <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN. Si es nuevo, se creará automáticamente.</div>
   </div>
 
-  <div class="nav">
-    <button onclick="mostrarVista('pronosticos')">Pronósticos</button>
-    <button onclick="mostrarVista('ranking')">Ranking</button>
-    <button id="btnAdmin" onclick="mostrarVista('admin')" style="display:none;">Administración</button>
+  <div class="card">
+    <h2>Partidos del día</h2>
+    <div id="partidos"></div>
+  </div>
+</section>
+
+<section id="vista-ranking" class="vista">
+  <div class="card">
+    <h2>Ranking diario</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Usuario</th>
+          <th>Puntos</th>
+        </tr>
+      </thead>
+      <tbody id="ranking"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="vista-admin" class="vista">
+  <div class="card">
+    <h2>Importar partidos</h2>
+    <p>Importa partidos desde archivo JSON gratuito de OpenFootball.</p>
+    <button class="green" onclick="importarPartidos()">Importar partidos</button>
   </div>
 
-  <section id="vista-pronosticos" class="vista activa">
-    <div class="card">
-      <h2>Fecha de la jornada</h2>
-      <div class="grid">
-        <input type="date" id="fecha" onchange="cargarTodo()">
-        <button class="green" onclick="cargarTodo()">Cargar jornada</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Partidos del día</h2>
-      <div id="partidos"></div>
-    </div>
-  </section>
-
-  <section id="vista-ranking" class="vista">
-    <div class="card">
-      <h2>Ranking diario</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Posición</th>
-            <th>Usuario</th>
-            <th>Puntos</th>
-          </tr>
-        </thead>
-        <tbody id="ranking"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="vista-admin" class="vista">
-    <div class="card">
-      <h2>Crear partido</h2>
-      <div class="grid">
-        <input id="adminLocal" placeholder="Equipo local">
-        <input id="adminVisitante" placeholder="Equipo visitante">
-        <input id="adminFecha" type="date">
-        <button onclick="crearPartido()">Crear</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Registrar resultado oficial</h2>
-      <div id="adminResultados"></div>
-    </div>
-  </section>
+  <div class="card">
+    <h2>Registrar resultados oficiales</h2>
+    <div id="adminResultados"></div>
+  </div>
+</section>
 
 </div>
 
@@ -234,45 +192,44 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let usuario = null;
 
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
-document.getElementById("adminFecha").value = document.getElementById("fecha").value;
 
-function mostrarVista(nombre) {
-  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
+function mostrarVista(nombre){
+  document.querySelectorAll(".vista").forEach(v=>v.classList.remove("activa"));
   document.getElementById("vista-" + nombre).classList.add("activa");
 }
 
-async function entrar() {
+async function entrar(){
   const nombre = document.getElementById("nombreUsuario").value.trim();
   const pin = document.getElementById("pinUsuario").value.trim();
 
-  if (!nombre || !pin) {
+  if(!nombre || !pin){
     alert("Ingrese nombre y PIN.");
     return;
   }
 
-  let { data, error } = await supabase
+  let {data,error} = await supabase
     .from("usuarios")
     .select("*")
     .eq("nombre", nombre)
     .maybeSingle();
 
-  if (!data) {
+  if(!data){
     const nuevo = await supabase
       .from("usuarios")
-      .insert({ nombre, pin, rol: "usuario" })
+      .insert({nombre, pin, rol:"usuario"})
       .select()
       .single();
 
     data = nuevo.data;
     error = nuevo.error;
-  } else {
-    if (data.pin !== pin) {
+  }else{
+    if(data.pin !== pin){
       alert("PIN incorrecto.");
       return;
     }
   }
 
-  if (error) {
+  if(error){
     alert("Error: " + error.message);
     return;
   }
@@ -285,28 +242,65 @@ async function entrar() {
   document.getElementById("usuarioActivo").innerText =
     "Usuario activo: " + usuario.nombre;
 
-  if (usuario.rol === "admin") {
+  if(usuario.rol === "admin"){
     document.getElementById("btnAdmin").style.display = "block";
-  } else {
-    document.getElementById("btnAdmin").style.display = "none";
   }
 
   cargarTodo();
 }
 
-async function cargarTodo() {
+async function importarPartidos(){
+  if(!usuario || usuario.rol !== "admin"){
+    alert("Solo el administrador puede importar partidos.");
+    return;
+  }
+
+  alert("De momento OpenFootball puede no tener calendario 2026 completo. Si no importa datos, se cargarán partidos de prueba.");
+
+  const partidosPrueba = [
+    {
+      id:"2026-001",
+      fecha:"2026-06-11",
+      equipo_a:"México",
+      equipo_b:"Equipo por definir"
+    },
+    {
+      id:"2026-002",
+      fecha:"2026-06-12",
+      equipo_a:"Canadá",
+      equipo_b:"Equipo por definir"
+    },
+    {
+      id:"2026-003",
+      fecha:"2026-06-13",
+      equipo_a:"Estados Unidos",
+      equipo_b:"Equipo por definir"
+    }
+  ];
+
+  for(const p of partidosPrueba){
+    await supabase
+      .from("partidos")
+      .upsert(p, {onConflict:"id"});
+  }
+
+  alert("Partidos importados.");
+  cargarTodo();
+}
+
+async function cargarTodo(){
   await cargarPartidos();
   await cargarRanking();
 }
 
-async function cargarPartidos() {
+async function cargarPartidos(){
   const fecha = document.getElementById("fecha").value;
 
-  const { data: partidos, error } = await supabase
+  const {data:partidos,error} = await supabase
     .from("partidos")
     .select("*")
     .eq("fecha", fecha)
-    .order("id", { ascending: true });
+    .order("id", {ascending:true});
 
   const contenedor = document.getElementById("partidos");
   const admin = document.getElementById("adminResultados");
@@ -314,20 +308,21 @@ async function cargarPartidos() {
   contenedor.innerHTML = "";
   admin.innerHTML = "";
 
-  if (error) {
+  if(error){
     contenedor.innerHTML = "Error al cargar partidos.";
     return;
   }
 
-  if (!partidos || partidos.length === 0) {
-    contenedor.innerHTML = "No hay partidos creados para esta fecha.";
+  if(!partidos || partidos.length === 0){
+    contenedor.innerHTML = "No hay partidos para esta fecha.";
+    admin.innerHTML = "No hay partidos para esta fecha.";
     return;
   }
 
-  for (const p of partidos) {
+  for(const p of partidos){
     let pronostico = null;
 
-    if (usuario) {
+    if(usuario){
       const res = await supabase
         .from("pronosticos")
         .select("*")
@@ -340,71 +335,69 @@ async function cargarPartidos() {
 
     contenedor.innerHTML += `
       <div class="match">
-        <div class="match-title">${p.equipo_local} vs ${p.equipo_visitante}</div>
+        <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
 
         <div class="notice">
           Resultado oficial:
-          ${p.goles_local === null ? "Pendiente" : p.goles_local + " - " + p.goles_visitante}
+          ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
         </div>
 
         <div class="score">
           <div>Su pronóstico</div>
-          <input id="pl_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_local : ""}">
-          <input id="pv_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_visitante : ""}">
-          <button onclick="guardarPronostico(${p.id}, ${p.cerrado})">
-            Guardar / Actualizar
-          </button>
+          <input id="pa_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_a : ""}">
+          <input id="pb_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_b : ""}">
+          <button onclick="guardarPronostico('${p.id}', ${p.cerrado})">Guardar / Actualizar</button>
         </div>
       </div>
     `;
 
     admin.innerHTML += `
       <div class="match">
-        <div class="match-title">${p.equipo_local} vs ${p.equipo_visitante}</div>
+        <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
 
         <div class="score">
           <div>Resultado oficial</div>
-          <input id="rl_${p.id}" type="number" min="0" value="${p.goles_local ?? ""}">
-          <input id="rv_${p.id}" type="number" min="0" value="${p.goles_visitante ?? ""}">
-          <button class="green" onclick="guardarResultado(${p.id})">Guardar resultado</button>
+          <input id="ra_${p.id}" type="number" min="0" value="${p.goles_a ?? ""}">
+          <input id="rb_${p.id}" type="number" min="0" value="${p.goles_b ?? ""}">
+          <button class="green" onclick="guardarResultado('${p.id}')">Guardar resultado</button>
         </div>
       </div>
     `;
   }
 }
 
-async function guardarPronostico(partidoId, cerrado) {
-  if (!usuario) {
+async function guardarPronostico(partidoId,cerrado){
+  if(!usuario){
     alert("Primero debe ingresar su usuario.");
     return;
   }
 
-  if (cerrado) {
-    alert("Este partido ya está cerrado. No se puede modificar el pronóstico.");
+  if(cerrado){
+    alert("Este partido ya está cerrado.");
     return;
   }
 
-  const golesLocal = document.getElementById("pl_" + partidoId).value;
-  const golesVisitante = document.getElementById("pv_" + partidoId).value;
+  const golesA = document.getElementById("pa_" + partidoId).value;
+  const golesB = document.getElementById("pb_" + partidoId).value;
 
-  if (golesLocal === "" || golesVisitante === "") {
+  if(golesA === "" || golesB === ""){
     alert("Ingrese ambos marcadores.");
     return;
   }
 
-  const { error } = await supabase
+  const {error} = await supabase
     .from("pronosticos")
     .upsert({
       usuario_id: usuario.id,
       partido_id: partidoId,
-      goles_local: Number(golesLocal),
-      goles_visitante: Number(golesVisitante),
+      goles_a: Number(golesA),
+      goles_b: Number(golesB),
       actualizado_en: new Date().toISOString()
     }, {
-      onConflict: "usuario_id,partido_id"
+      onConflict:"usuario_id,partido_id"
     });
 
-  if (error) {
+  if(error){
     alert("Error: " + error.message);
     return;
   }
@@ -413,111 +406,81 @@ async function guardarPronostico(partidoId, cerrado) {
   cargarTodo();
 }
 
-async function crearPartido() {
-  if (!usuario || usuario.rol !== "admin") {
-    alert("Solo el administrador puede crear partidos.");
-    return;
-  }
-
-  const equipo_local = document.getElementById("adminLocal").value.trim();
-  const equipo_visitante = document.getElementById("adminVisitante").value.trim();
-  const fecha = document.getElementById("adminFecha").value;
-
-  if (!equipo_local || !equipo_visitante || !fecha) {
-    alert("Complete todos los datos del partido.");
-    return;
-  }
-
-  const { error } = await supabase
-    .from("partidos")
-    .insert({ equipo_local, equipo_visitante, fecha });
-
-  if (error) {
-    alert("Error: " + error.message);
-    return;
-  }
-
-  document.getElementById("adminLocal").value = "";
-  document.getElementById("adminVisitante").value = "";
-
-  alert("Partido creado.");
-  cargarTodo();
-}
-
-async function guardarResultado(partidoId) {
-  if (!usuario || usuario.rol !== "admin") {
+async function guardarResultado(partidoId){
+  if(!usuario || usuario.rol !== "admin"){
     alert("Solo el administrador puede registrar resultados.");
     return;
   }
 
-  const golesLocal = document.getElementById("rl_" + partidoId).value;
-  const golesVisitante = document.getElementById("rv_" + partidoId).value;
+  const golesA = document.getElementById("ra_" + partidoId).value;
+  const golesB = document.getElementById("rb_" + partidoId).value;
 
-  if (golesLocal === "" || golesVisitante === "") {
+  if(golesA === "" || golesB === ""){
     alert("Ingrese ambos resultados.");
     return;
   }
 
-  const { error } = await supabase
+  const {error} = await supabase
     .from("partidos")
     .update({
-      goles_local: Number(golesLocal),
-      goles_visitante: Number(golesVisitante),
-      cerrado: true
+      goles_a:Number(golesA),
+      goles_b:Number(golesB),
+      cerrado:true
     })
     .eq("id", partidoId);
 
-  if (error) {
+  if(error){
     alert("Error: " + error.message);
     return;
   }
 
   await calcularPuntos(partidoId);
+
   alert("Resultado guardado y puntos calculados.");
   cargarTodo();
 }
 
-async function calcularPuntos(partidoId) {
-  const { data: partido } = await supabase
+async function calcularPuntos(partidoId){
+  const {data:partido} = await supabase
     .from("partidos")
     .select("*")
     .eq("id", partidoId)
     .single();
 
-  const { data: pronosticos } = await supabase
+  const {data:pronosticos} = await supabase
     .from("pronosticos")
     .select("*")
     .eq("partido_id", partidoId);
 
-  for (const pr of pronosticos) {
+  for(const pr of pronosticos){
     let puntos = 0;
 
     const exacto =
-      pr.goles_local === partido.goles_local &&
-      pr.goles_visitante === partido.goles_visitante;
+      pr.goles_a === partido.goles_a &&
+      pr.goles_b === partido.goles_b;
 
     const resultadoPronostico =
-      pr.goles_local > pr.goles_visitante ? "L" :
-      pr.goles_local < pr.goles_visitante ? "V" : "E";
+      pr.goles_a > pr.goles_b ? "A" :
+      pr.goles_a < pr.goles_b ? "B" : "E";
 
     const resultadoReal =
-      partido.goles_local > partido.goles_visitante ? "L" :
-      partido.goles_local < partido.goles_visitante ? "V" : "E";
+      partido.goles_a > partido.goles_b ? "A" :
+      partido.goles_a < partido.goles_b ? "B" : "E";
 
-    if (exacto) puntos = 3;
-    else if (resultadoPronostico === resultadoReal) puntos = 1;
+    if(exacto) puntos = 3;
+    else if(resultadoPronostico === resultadoReal) puntos = 1;
 
     await supabase
       .from("pronosticos")
-      .update({ puntos })
+      .update({puntos})
       .eq("id", pr.id);
   }
 }
 
-async function cargarRanking() {
+async function cargarRanking(){
   const fecha = document.getElementById("fecha").value;
 
-  const { data } = await supabase
+  const {data} = await supabase
     .from("pronosticos")
     .select(`
       puntos,
@@ -528,27 +491,26 @@ async function cargarRanking() {
 
   const acumulado = {};
 
-  if (data) {
-    data.forEach(item => {
-      if (!item.usuarios || !item.partidos) return;
-
+  if(data){
+    data.forEach(item=>{
+      if(!item.usuarios || !item.partidos) return;
       const nombre = item.usuarios.nombre;
       acumulado[nombre] = (acumulado[nombre] || 0) + item.puntos;
     });
   }
 
   const ranking = Object.entries(acumulado)
-    .sort((a, b) => b[1] - a[1]);
+    .sort((a,b)=>b[1]-a[1]);
 
   const tbody = document.getElementById("ranking");
   tbody.innerHTML = "";
 
-  if (ranking.length === 0) {
+  if(ranking.length === 0){
     tbody.innerHTML = "<tr><td colspan='3'>No hay puntos registrados todavía.</td></tr>";
     return;
   }
 
-  ranking.forEach((r, index) => {
+  ranking.forEach((r,index)=>{
     tbody.innerHTML += `
       <tr>
         <td>${index + 1}</td>
@@ -562,7 +524,7 @@ async function cargarRanking() {
 const nombreGuardado = localStorage.getItem("nombreUsuario");
 const pinGuardado = localStorage.getItem("pinUsuario");
 
-if (nombreGuardado && pinGuardado) {
+if(nombreGuardado && pinGuardado){
   document.getElementById("nombreUsuario").value = nombreGuardado;
   document.getElementById("pinUsuario").value = pinGuardado;
 }
