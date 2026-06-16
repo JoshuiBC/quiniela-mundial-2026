@@ -152,33 +152,57 @@ td,th{
 @media(max-width:750px){
 
   .app{
+    width:100%;
     padding:12px;
   }
 
   .hero{
-    padding:22px;
-    border-radius:16px;
+    padding:20px;
   }
 
   .hero h1{
-    font-size:28px;
-    word-break:break-word;
+    font-size:30px;
   }
 
   .card{
     padding:16px;
-    border-radius:14px;
+    overflow:hidden;
   }
 
-  .grid,
-  .score,
+  .grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
   .nav{
     display:grid;
     grid-template-columns:1fr;
+    gap:10px;
   }
 
-  .match-title{
-    font-size:18px;
+  .score{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  input,
+  button,
+  select,
+  textarea{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+  }
+
+  input[type="date"]{
+    width:100%;
+    max-width:100%;
+    display:block;
+    appearance:none;
+    -webkit-appearance:none;
+    text-align:center;
   }
 
   table,
