@@ -8,103 +8,29 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0f172a;
-  color:#111827;
-}
-.app{
-  max-width:1100px;
-  margin:auto;
-  padding:25px;
-}
-.hero{
-  background:linear-gradient(135deg,#0f766e,#1d4ed8);
-  color:white;
-  padding:30px;
-  border-radius:20px;
-  margin-bottom:20px;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#111827}
+.app{max-width:1100px;margin:auto;padding:25px}
+.hero{background:linear-gradient(135deg,#0f766e,#1d4ed8);color:white;padding:30px;border-radius:20px;margin-bottom:20px}
 .hero h1{margin:0;font-size:40px}
-.card{
-  background:white;
-  padding:25px;
-  border-radius:18px;
-  margin-bottom:20px;
-}
-.nav{
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
-}
+.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px}
+.nav{display:flex;gap:10px;margin-bottom:20px}
 .nav button{flex:1}
-input,button{
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #cbd5e1;
-  font-size:15px;
-}
-button{
-  background:#1d4ed8;
-  color:white;
-  border:none;
-  cursor:pointer;
-  font-weight:bold;
-}
+input,button{padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px}
+button{background:#1d4ed8;color:white;border:none;cursor:pointer;font-weight:bold}
 button:hover{background:#1e40af}
 .green{background:#0f766e}
-.red{background:#991b1b}
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr auto;
-  gap:10px;
-}
-.match{
-  background:#f8fafc;
-  padding:18px;
-  border-radius:14px;
-  border:1px solid #e5e7eb;
-  margin-bottom:15px;
-}
-.match-title{
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:10px;
-}
-.score{
-  display:grid;
-  grid-template-columns:1fr 90px 90px auto;
-  gap:10px;
-  align-items:center;
-}
-.notice{
-  background:#eff6ff;
-  border-left:5px solid #2563eb;
-  padding:10px;
-  border-radius:8px;
-  margin:10px 0;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-th{
-  background:#1e3a8a;
-  color:white;
-}
-td,th{
-  padding:12px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:left;
-}
+.grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
+.match{background:#f8fafc;padding:18px;border-radius:14px;border:1px solid #e5e7eb;margin-bottom:15px}
+.match-title{font-size:20px;font-weight:bold;margin-bottom:10px}
+.score{display:grid;grid-template-columns:1fr 90px 90px auto;gap:10px;align-items:center}
+.notice{background:#eff6ff;border-left:5px solid #2563eb;padding:10px;border-radius:8px;margin:10px 0}
+table{width:100%;border-collapse:collapse}
+th{background:#1e3a8a;color:white}
+td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
 .vista{display:none}
 .vista.activa{display:block}
 @media(max-width:750px){
-  .grid,.score,.nav{
-    display:grid;
-    grid-template-columns:1fr;
-  }
+  .grid,.score,.nav{display:grid;grid-template-columns:1fr}
   .hero h1{font-size:30px}
 }
 </style>
@@ -171,7 +97,7 @@ td,th{
 <section id="vista-admin" class="vista">
   <div class="card">
     <h2>Importar partidos</h2>
-    <p>Importa partidos desde archivo JSON gratuito de OpenFootball.</p>
+    <p>Importa partidos base del Mundial 2026.</p>
     <button class="green" onclick="importarPartidos()">Importar partidos</button>
   </div>
 
@@ -187,7 +113,7 @@ td,th{
 const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuario = null;
 
@@ -207,14 +133,14 @@ async function entrar(){
     return;
   }
 
-  let {data,error} = await supabase
+  let {data,error} = await db
     .from("usuarios")
     .select("*")
     .eq("nombre", nombre)
     .maybeSingle();
 
   if(!data){
-    const nuevo = await supabase
+    const nuevo = await db
       .from("usuarios")
       .insert({nombre, pin, rol:"usuario"})
       .select()
@@ -242,9 +168,8 @@ async function entrar(){
   document.getElementById("usuarioActivo").innerText =
     "Usuario activo: " + usuario.nombre;
 
-  if(usuario.rol === "admin"){
-    document.getElementById("btnAdmin").style.display = "block";
-  }
+  document.getElementById("btnAdmin").style.display =
+    usuario.rol === "admin" ? "block" : "none";
 
   cargarTodo();
 }
@@ -255,33 +180,14 @@ async function importarPartidos(){
     return;
   }
 
-  alert("De momento OpenFootball puede no tener calendario 2026 completo. Si no importa datos, se cargarán partidos de prueba.");
-
   const partidosPrueba = [
-    {
-      id:"2026-001",
-      fecha:"2026-06-11",
-      equipo_a:"México",
-      equipo_b:"Equipo por definir"
-    },
-    {
-      id:"2026-002",
-      fecha:"2026-06-12",
-      equipo_a:"Canadá",
-      equipo_b:"Equipo por definir"
-    },
-    {
-      id:"2026-003",
-      fecha:"2026-06-13",
-      equipo_a:"Estados Unidos",
-      equipo_b:"Equipo por definir"
-    }
+    {id:"2026-001",fecha:"2026-06-11",equipo_a:"México",equipo_b:"Equipo por definir"},
+    {id:"2026-002",fecha:"2026-06-12",equipo_a:"Canadá",equipo_b:"Equipo por definir"},
+    {id:"2026-003",fecha:"2026-06-13",equipo_a:"Estados Unidos",equipo_b:"Equipo por definir"}
   ];
 
   for(const p of partidosPrueba){
-    await supabase
-      .from("partidos")
-      .upsert(p, {onConflict:"id"});
+    await db.from("partidos").upsert(p,{onConflict:"id"});
   }
 
   alert("Partidos importados.");
@@ -296,7 +202,7 @@ async function cargarTodo(){
 async function cargarPartidos(){
   const fecha = document.getElementById("fecha").value;
 
-  const {data:partidos,error} = await supabase
+  const {data:partidos,error} = await db
     .from("partidos")
     .select("*")
     .eq("fecha", fecha)
@@ -323,7 +229,7 @@ async function cargarPartidos(){
     let pronostico = null;
 
     if(usuario){
-      const res = await supabase
+      const res = await db
         .from("pronosticos")
         .select("*")
         .eq("usuario_id", usuario.id)
@@ -336,12 +242,10 @@ async function cargarPartidos(){
     contenedor.innerHTML += `
       <div class="match">
         <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
-
         <div class="notice">
           Resultado oficial:
           ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
         </div>
-
         <div class="score">
           <div>Su pronóstico</div>
           <input id="pa_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_a : ""}">
@@ -354,7 +258,6 @@ async function cargarPartidos(){
     admin.innerHTML += `
       <div class="match">
         <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
-
         <div class="score">
           <div>Resultado oficial</div>
           <input id="ra_${p.id}" type="number" min="0" value="${p.goles_a ?? ""}">
@@ -385,7 +288,7 @@ async function guardarPronostico(partidoId,cerrado){
     return;
   }
 
-  const {error} = await supabase
+  const {error} = await db
     .from("pronosticos")
     .upsert({
       usuario_id: usuario.id,
@@ -420,7 +323,7 @@ async function guardarResultado(partidoId){
     return;
   }
 
-  const {error} = await supabase
+  const {error} = await db
     .from("partidos")
     .update({
       goles_a:Number(golesA),
@@ -441,13 +344,13 @@ async function guardarResultado(partidoId){
 }
 
 async function calcularPuntos(partidoId){
-  const {data:partido} = await supabase
+  const {data:partido} = await db
     .from("partidos")
     .select("*")
     .eq("id", partidoId)
     .single();
 
-  const {data:pronosticos} = await supabase
+  const {data:pronosticos} = await db
     .from("pronosticos")
     .select("*")
     .eq("partido_id", partidoId);
@@ -470,7 +373,7 @@ async function calcularPuntos(partidoId){
     if(exacto) puntos = 3;
     else if(resultadoPronostico === resultadoReal) puntos = 1;
 
-    await supabase
+    await db
       .from("pronosticos")
       .update({puntos})
       .eq("id", pr.id);
@@ -480,7 +383,7 @@ async function calcularPuntos(partidoId){
 async function cargarRanking(){
   const fecha = document.getElementById("fecha").value;
 
-  const {data} = await supabase
+  const {data} = await db
     .from("pronosticos")
     .select(`
       puntos,
