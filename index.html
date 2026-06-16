@@ -1,72 +1,211 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Quiniela Mundial 2026</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Quiniela Boboty</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
+
+h1{
+    text-align:center;
+    color:#0d6efd;
+    margin-bottom:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr auto;
+    gap:10px;
+}
+
+input{
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+}
+
+button{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:12px 20px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0b5ed7;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+}
+
+th,td{
+    padding:12px;
+    border:1px solid #ddd;
+    text-align:left;
+}
+
+@media(max-width:768px){
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+
 </head>
 <body>
-  <h1>Quiniela Mundial 2026</h1>
 
-  <input id="participante" placeholder="Nombre">
-  <input id="partido" placeholder="Partido">
-  <input id="marcador" placeholder="Marcador, ejemplo 2-1">
-  <button onclick="guardar()">Guardar</button>
+<div class="container">
 
-  <h2>Pronósticos</h2>
-  <ul id="lista"></ul>
+<div class="card">
 
-  <script>
-    const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
+<h1>⚽ Quiniela Boboty ⚽</h1>
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<div class="form-grid">
 
-    async function guardar() {
-      const participante = document.getElementById("participante").value;
-      const partido = document.getElementById("partido").value;
-      const marcador = document.getElementById("marcador").value;
+<input id="participante" placeholder="Nombre">
 
-      if (!participante || !partido || !marcador) {
-        alert("Complete todos los campos");
-        return;
-      }
+<input id="partido" placeholder="Ej: Costa Rica vs España">
 
-      const { error } = await supabase
-        .from("pronosticos")
-        .insert([{ participante, partido, marcador }]);
+<input id="marcador" placeholder="Ej: 2-1">
 
-      if (error) {
-        alert("Error: " + error.message);
-      } else {
-        alert("Pronóstico guardado");
-        document.getElementById("participante").value = "";
-        document.getElementById("partido").value = "";
-        document.getElementById("marcador").value = "";
-        cargar();
-      }
-    }
+<button onclick="guardar()">Guardar</button>
 
-    async function cargar() {
-      const { data, error } = await supabase
-        .from("pronosticos")
-        .select("*")
-        .order("creado_en", { ascending: false });
+</div>
 
-      const lista = document.getElementById("lista");
-      lista.innerHTML = "";
+<h2>Pronósticos registrados</h2>
 
-      if (error) {
-        lista.innerHTML = "<li>Error cargando datos</li>";
-        return;
-      }
+<table>
+<thead>
+<tr>
+<th>Participante</th>
+<th>Partido</th>
+<th>Marcador</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
 
-      data.forEach(p => {
-        lista.innerHTML += `<li><strong>${p.participante}</strong>: ${p.partido} — ${p.marcador}</li>`;
-      });
-    }
+</div>
 
-    cargar();
-  </script>
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://djrntoiunpgcurwvyazk.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
+
+const supabase =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+async function guardar(){
+
+const participante =
+document.getElementById("participante").value;
+
+const partido =
+document.getElementById("partido").value;
+
+const marcador =
+document.getElementById("marcador").value;
+
+if(!participante || !partido || !marcador){
+alert("Complete todos los campos");
+return;
+}
+
+const {error} =
+await supabase
+.from("pronosticos")
+.insert([
+{
+participante,
+partido,
+marcador
+}
+]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById("participante").value="";
+document.getElementById("partido").value="";
+document.getElementById("marcador").value="";
+
+cargar();
+}
+
+async function cargar(){
+
+const {data,error} =
+await supabase
+.from("pronosticos")
+.select("*")
+.order("id",{ascending:false});
+
+if(error) return;
+
+const tabla =
+document.getElementById("tabla");
+
+tabla.innerHTML="";
+
+data.forEach(item=>{
+
+tabla.innerHTML += `
+<tr>
+<td>${item.participante}</td>
+<td>${item.partido}</td>
+<td>${item.marcador}</td>
+</tr>
+`;
+
+});
+
+}
+
+cargar();
+
+</script>
+
 </body>
 </html>
