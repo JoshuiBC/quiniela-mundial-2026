@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiniela Mundial 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Quiniela Mundial 2026</h1>
+
+  <input id="participante" placeholder="Nombre">
+  <input id="partido" placeholder="Partido">
+  <input id="marcador" placeholder="Marcador, ejemplo 2-1">
+  <button onclick="guardar()">Guardar</button>
+
+  <h2>Pronósticos</h2>
+  <ul id="lista"></ul>
+
+  <script>
+    const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function guardar() {
+      const participante = document.getElementById("participante").value;
+      const partido = document.getElementById("partido").value;
+      const marcador = document.getElementById("marcador").value;
+
+      if (!participante || !partido || !marcador) {
+        alert("Complete todos los campos");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("pronosticos")
+        .insert([{ participante, partido, marcador }]);
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("Pronóstico guardado");
+        document.getElementById("participante").value = "";
+        document.getElementById("partido").value = "";
+        document.getElementById("marcador").value = "";
+        cargar();
+      }
+    }
+
+    async function cargar() {
+      const { data, error } = await supabase
+        .from("pronosticos")
+        .select("*")
+        .order("creado_en", { ascending: false });
+
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
+
+      if (error) {
+        lista.innerHTML = "<li>Error cargando datos</li>";
+        return;
+      }
+
+      data.forEach(p => {
+        lista.innerHTML += `<li><strong>${p.participante}</strong>: ${p.partido} — ${p.marcador}</li>`;
+      });
+    }
+
+    cargar();
+  </script>
+</body>
+</html>
