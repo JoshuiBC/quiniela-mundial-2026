@@ -2,209 +2,514 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiniela Boboty</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-    font-family: Arial, sans-serif;
-    background:#f4f6f9;
-    margin:0;
-    padding:20px;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #06141f, #102a43);
+  color: #111827;
 }
 
-.container{
-    max-width:900px;
-    margin:auto;
+.app {
+  max-width: 1100px;
+  margin: auto;
+  padding: 30px 15px;
 }
 
-.card{
-    background:white;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 4px 15px rgba(0,0,0,.1);
+.hero {
+  background: linear-gradient(135deg, #003566, #0077b6);
+  color: white;
+  padding: 35px;
+  border-radius: 22px;
+  margin-bottom: 25px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.35);
 }
 
-h1{
-    text-align:center;
-    color:#0d6efd;
-    margin-bottom:20px;
+.hero h1 {
+  margin: 0;
+  font-size: 40px;
 }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr auto;
-    gap:10px;
+.hero p {
+  margin-top: 10px;
+  opacity: .9;
 }
 
-input{
-    padding:12px;
-    border:1px solid #ddd;
-    border-radius:8px;
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 22px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.22);
 }
 
-button{
-    background:#0d6efd;
-    color:white;
-    border:none;
-    border-radius:8px;
-    padding:12px 20px;
-    cursor:pointer;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
 }
 
-button:hover{
-    background:#0b5ed7;
+.match {
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  border-radius: 14px;
+  margin-bottom: 15px;
+  background: #f9fafb;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
+.match-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-th{
-    background:#0d6efd;
-    color:white;
+.score {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px auto;
+  gap: 10px;
+  align-items: center;
 }
 
-th,td{
-    padding:12px;
-    border:1px solid #ddd;
-    text-align:left;
+input, select {
+  padding: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
 }
 
-@media(max-width:768px){
-    .form-grid{
-        grid-template-columns:1fr;
-    }
+button {
+  padding: 13px 18px;
+  border: none;
+  background: #00509d;
+  color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #003f7d;
+}
+
+.secondary {
+  background: #0f766e;
+}
+
+.secondary:hover {
+  background: #115e59;
+}
+
+.danger {
+  background: #991b1b;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #003566;
+  color: white;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.notice {
+  background: #eff6ff;
+  padding: 12px;
+  border-left: 5px solid #2563eb;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+@media(max-width: 750px) {
+  .grid, .score {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
 }
 </style>
-
 </head>
+
 <body>
 
-<div class="container">
+<div class="app">
 
-<div class="card">
+  <div class="hero">
+    <h1>Quiniela Boboty</h1>
+    <p>Pronósticos diarios, resultados y ranking automático.</p>
+  </div>
 
-<h1>⚽ Quiniela Boboty ⚽</h1>
+  <div class="card">
+    <h2>Usuario</h2>
+    <div class="grid">
+      <input id="nombreUsuario" placeholder="Escriba su nombre">
+      <button onclick="usarUsuario()">Entrar</button>
+    </div>
+    <div id="usuarioActivo" class="notice"></div>
+  </div>
 
-<div class="form-grid">
+  <div class="card">
+    <h2>Fecha de la jornada</h2>
+    <div class="grid">
+      <input type="date" id="fecha" onchange="cargarTodo()">
+      <button class="secondary" onclick="cargarTodo()">Cargar jornada</button>
+    </div>
+  </div>
 
-<input id="participante" placeholder="Nombre">
+  <div class="card">
+    <h2>Partidos del día</h2>
+    <div id="partidos"></div>
+  </div>
 
-<input id="partido" placeholder="Ej: Costa Rica vs España">
+  <div class="card">
+    <h2>Ranking diario</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Usuario</th>
+          <th>Puntos</th>
+        </tr>
+      </thead>
+      <tbody id="ranking"></tbody>
+    </table>
+  </div>
 
-<input id="marcador" placeholder="Ej: 2-1">
+  <div class="card">
+    <h2>Administrador: crear partido</h2>
+    <div class="score">
+      <input id="adminLocal" placeholder="Equipo local">
+      <input id="adminVisitante" placeholder="Equipo visitante">
+      <input id="adminFecha" type="date">
+      <button onclick="crearPartido()">Crear</button>
+    </div>
+  </div>
 
-<button onclick="guardar()">Guardar</button>
-
-</div>
-
-<h2>Pronósticos registrados</h2>
-
-<table>
-<thead>
-<tr>
-<th>Participante</th>
-<th>Partido</th>
-<th>Marcador</th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-
-</div>
+  <div class="card">
+    <h2>Administrador: registrar resultado</h2>
+    <div id="adminResultados"></div>
+  </div>
 
 </div>
 
 <script>
+const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
 
-const SUPABASE_URL =
-"https://djrntoiunpgcurwvyazk.supabase.co";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SUPABASE_KEY =
-"sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
+let usuario = null;
 
-const supabase =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
+document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+document.getElementById("adminFecha").value = document.getElementById("fecha").value;
 
-async function guardar(){
+async function usarUsuario() {
+  const nombre = document.getElementById("nombreUsuario").value.trim();
 
-const participante =
-document.getElementById("participante").value;
+  if (!nombre) {
+    alert("Escriba su nombre");
+    return;
+  }
 
-const partido =
-document.getElementById("partido").value;
+  let { data, error } = await supabase
+    .from("usuarios")
+    .select("*")
+    .eq("nombre", nombre)
+    .single();
 
-const marcador =
-document.getElementById("marcador").value;
+  if (!data) {
+    const nuevo = await supabase
+      .from("usuarios")
+      .insert({ nombre })
+      .select()
+      .single();
 
-if(!participante || !partido || !marcador){
-alert("Complete todos los campos");
-return;
+    data = nuevo.data;
+    error = nuevo.error;
+  }
+
+  if (error) {
+    alert("Error al crear o cargar usuario: " + error.message);
+    return;
+  }
+
+  usuario = data;
+  localStorage.setItem("usuarioNombre", nombre);
+
+  document.getElementById("usuarioActivo").innerText =
+    "Usuario activo: " + usuario.nombre;
+
+  cargarTodo();
 }
 
-const {error} =
-await supabase
-.from("pronosticos")
-.insert([
-{
-participante,
-partido,
-marcador
-}
-]);
-
-if(error){
-alert(error.message);
-return;
+async function cargarTodo() {
+  await cargarPartidos();
+  await cargarRanking();
 }
 
-document.getElementById("participante").value="";
-document.getElementById("partido").value="";
-document.getElementById("marcador").value="";
+async function cargarPartidos() {
+  const fecha = document.getElementById("fecha").value;
 
-cargar();
+  const { data: partidos, error } = await supabase
+    .from("partidos")
+    .select("*")
+    .eq("fecha", fecha)
+    .order("id", { ascending: true });
+
+  const contenedor = document.getElementById("partidos");
+  const admin = document.getElementById("adminResultados");
+
+  contenedor.innerHTML = "";
+  admin.innerHTML = "";
+
+  if (error) {
+    contenedor.innerHTML = "Error al cargar partidos.";
+    return;
+  }
+
+  if (!partidos || partidos.length === 0) {
+    contenedor.innerHTML = "No hay partidos creados para esta fecha.";
+    return;
+  }
+
+  for (const p of partidos) {
+    let pronostico = null;
+
+    if (usuario) {
+      const res = await supabase
+        .from("pronosticos")
+        .select("*")
+        .eq("usuario_id", usuario.id)
+        .eq("partido_id", p.id)
+        .maybeSingle();
+
+      pronostico = res.data;
+    }
+
+    contenedor.innerHTML += `
+      <div class="match">
+        <div class="match-title">${p.equipo_local} vs ${p.equipo_visitante}</div>
+        <div class="notice">
+          Resultado oficial:
+          ${p.goles_local === null ? "Pendiente" : p.goles_local + " - " + p.goles_visitante}
+        </div>
+
+        <div class="score">
+          <div>Su pronóstico</div>
+          <input id="pl_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_local : ""}">
+          <input id="pv_${p.id}" type="number" min="0" value="${pronostico ? pronostico.goles_visitante : ""}">
+          <button onclick="guardarPronostico(${p.id})">Guardar / Actualizar</button>
+        </div>
+      </div>
+    `;
+
+    admin.innerHTML += `
+      <div class="match">
+        <div class="match-title">${p.equipo_local} vs ${p.equipo_visitante}</div>
+        <div class="score">
+          <div>Resultado oficial</div>
+          <input id="rl_${p.id}" type="number" min="0" value="${p.goles_local ?? ""}">
+          <input id="rv_${p.id}" type="number" min="0" value="${p.goles_visitante ?? ""}">
+          <button class="secondary" onclick="guardarResultado(${p.id})">Guardar resultado</button>
+        </div>
+      </div>
+    `;
+  }
 }
 
-async function cargar(){
+async function guardarPronostico(partidoId) {
+  if (!usuario) {
+    alert("Primero debe ingresar su usuario.");
+    return;
+  }
 
-const {data,error} =
-await supabase
-.from("pronosticos")
-.select("*")
-.order("id",{ascending:false});
+  const golesLocal = document.getElementById("pl_" + partidoId).value;
+  const golesVisitante = document.getElementById("pv_" + partidoId).value;
 
-if(error) return;
+  if (golesLocal === "" || golesVisitante === "") {
+    alert("Ingrese ambos marcadores.");
+    return;
+  }
 
-const tabla =
-document.getElementById("tabla");
+  const { error } = await supabase
+    .from("pronosticos")
+    .upsert({
+      usuario_id: usuario.id,
+      partido_id: partidoId,
+      goles_local: Number(golesLocal),
+      goles_visitante: Number(golesVisitante),
+      actualizado_en: new Date().toISOString()
+    }, {
+      onConflict: "usuario_id,partido_id"
+    });
 
-tabla.innerHTML="";
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
 
-data.forEach(item=>{
-
-tabla.innerHTML += `
-<tr>
-<td>${item.participante}</td>
-<td>${item.partido}</td>
-<td>${item.marcador}</td>
-</tr>
-`;
-
-});
-
+  alert("Pronóstico guardado.");
+  cargarTodo();
 }
 
-cargar();
+async function crearPartido() {
+  const equipo_local = document.getElementById("adminLocal").value.trim();
+  const equipo_visitante = document.getElementById("adminVisitante").value.trim();
+  const fecha = document.getElementById("adminFecha").value;
 
+  if (!equipo_local || !equipo_visitante || !fecha) {
+    alert("Complete todos los datos del partido.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("partidos")
+    .insert({
+      equipo_local,
+      equipo_visitante,
+      fecha
+    });
+
+  if (error) {
+    alert("Error al crear partido: " + error.message);
+    return;
+  }
+
+  document.getElementById("adminLocal").value = "";
+  document.getElementById("adminVisitante").value = "";
+
+  alert("Partido creado.");
+  cargarTodo();
+}
+
+async function guardarResultado(partidoId) {
+  const golesLocal = document.getElementById("rl_" + partidoId).value;
+  const golesVisitante = document.getElementById("rv_" + partidoId).value;
+
+  if (golesLocal === "" || golesVisitante === "") {
+    alert("Ingrese ambos resultados.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("partidos")
+    .update({
+      goles_local: Number(golesLocal),
+      goles_visitante: Number(golesVisitante),
+      cerrado: true
+    })
+    .eq("id", partidoId);
+
+  if (error) {
+    alert("Error al guardar resultado: " + error.message);
+    return;
+  }
+
+  await calcularPuntos(partidoId);
+  alert("Resultado guardado y puntos calculados.");
+  cargarTodo();
+}
+
+async function calcularPuntos(partidoId) {
+  const { data: partido } = await supabase
+    .from("partidos")
+    .select("*")
+    .eq("id", partidoId)
+    .single();
+
+  const { data: pronosticos } = await supabase
+    .from("pronosticos")
+    .select("*")
+    .eq("partido_id", partidoId);
+
+  for (const pr of pronosticos) {
+    let puntos = 0;
+
+    const exacto =
+      pr.goles_local === partido.goles_local &&
+      pr.goles_visitante === partido.goles_visitante;
+
+    const resultadoPronostico =
+      pr.goles_local > pr.goles_visitante ? "L" :
+      pr.goles_local < pr.goles_visitante ? "V" : "E";
+
+    const resultadoReal =
+      partido.goles_local > partido.goles_visitante ? "L" :
+      partido.goles_local < partido.goles_visitante ? "V" : "E";
+
+    if (exacto) puntos = 3;
+    else if (resultadoPronostico === resultadoReal) puntos = 1;
+
+    await supabase
+      .from("pronosticos")
+      .update({ puntos })
+      .eq("id", pr.id);
+  }
+}
+
+async function cargarRanking() {
+  const fecha = document.getElementById("fecha").value;
+
+  const { data } = await supabase
+    .from("pronosticos")
+    .select(`
+      puntos,
+      usuarios(nombre),
+      partidos(fecha)
+    `)
+    .eq("partidos.fecha", fecha);
+
+  const acumulado = {};
+
+  if (data) {
+    data.forEach(item => {
+      if (!item.usuarios) return;
+      const nombre = item.usuarios.nombre;
+      acumulado[nombre] = (acumulado[nombre] || 0) + item.puntos;
+    });
+  }
+
+  const ranking = Object.entries(acumulado)
+    .sort((a, b) => b[1] - a[1]);
+
+  const tbody = document.getElementById("ranking");
+  tbody.innerHTML = "";
+
+  if (ranking.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='3'>No hay puntos registrados todavía.</td></tr>";
+    return;
+  }
+
+  ranking.forEach((r, index) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${r[0]}</td>
+        <td>${r[1]}</td>
+      </tr>
+    `;
+  });
+}
+
+const usuarioGuardado = localStorage.getItem("usuarioNombre");
+if (usuarioGuardado) {
+  document.getElementById("nombreUsuario").value = usuarioGuardado;
+}
+
+cargarTodo();
 </script>
 
 </body>
