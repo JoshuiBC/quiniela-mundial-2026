@@ -55,7 +55,13 @@ td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-alig
     <input id="pinUsuario" type="password" placeholder="PIN">
     <button onclick="entrar()">Entrar / Registrarse</button>
   </div>
-  <button class="red logout" onclick="cerrarSesion()">Cerrar sesión</button>
+  <button
+  id="btnCerrarSesion"
+  class="red logout"
+  onclick="cerrarSesion()"
+  style="display:none;">
+  Cerrar sesión
+</button>
   <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN.</div>
 </div>
 
@@ -128,18 +134,7 @@ function mostrarVista(nombre){
 }
 
 function cerrarSesion(){
-  usuario = null;
-  localStorage.removeItem("nombreUsuario");
-  localStorage.removeItem("pinUsuario");
 
-  document.getElementById("nombreUsuario").value = "";
-  document.getElementById("pinUsuario").value = "";
-  document.getElementById("usuarioActivo").innerText = "Sesión cerrada.";
-  document.getElementById("btnAdmin").style.display = "none";
-
-  mostrarVista("pronosticos");
-  cargarTodo();
-}
 
 async function entrar(){
   const nombre = document.getElementById("nombreUsuario").value.trim();
@@ -182,12 +177,13 @@ async function entrar(){
   localStorage.setItem("nombreUsuario", nombre);
   localStorage.setItem("pinUsuario", pin);
 
-  document.getElementById("usuarioActivo").innerText = "Usuario activo: " + usuario.nombre;
+document.getElementById("usuarioActivo").innerText =
+  "Usuario activo: " + usuario.nombre;
 
-  document.getElementById("btnAdmin").style.display =
-    usuario.rol === "admin" ? "block" : "none";
+document.getElementById("btnCerrarSesion").style.display = "block";
 
-  cargarTodo();
+document.getElementById("btnAdmin").style.display =
+  usuario.rol === "admin" ? "block" : "none";
 }
 
 function normalizarFecha(valor){
@@ -595,6 +591,8 @@ const pinGuardado = localStorage.getItem("pinUsuario");
 if(nombreGuardado && pinGuardado){
   document.getElementById("nombreUsuario").value = nombreGuardado;
   document.getElementById("pinUsuario").value = pinGuardado;
+
+  document.getElementById("btnCerrarSesion").style.display = "block";
 }
 
 cargarTodo();
