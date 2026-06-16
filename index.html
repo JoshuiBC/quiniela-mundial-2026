@@ -1,624 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiniela Boboty</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#111827}
-.app{max-width:1100px;margin:auto;padding:25px}
-.hero{background:linear-gradient(135deg,#0f766e,#1d4ed8);color:white;padding:30px;border-radius:20px;margin-bottom:20px}
-.hero h1{margin:0;font-size:40px}
-.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px}
-.nav{display:flex;gap:10px;margin-bottom:20px}
-.nav button{flex:1}
-input,button{padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px}
-button{background:#1d4ed8;color:white;border:none;cursor:pointer;font-weight:bold}
-button:hover{background:#1e40af}
-.green{background:#0f766e}
-.red{background:#991b1b}
-.grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
-.match{background:#f8fafc;padding:18px;border-radius:14px;border:1px solid #e5e7eb;margin-bottom:15px}
-.match-title{font-size:20px;font-weight:bold;margin-bottom:10px}
-.score{display:grid;grid-template-columns:1fr 90px 90px auto;gap:10px;align-items:center}
-.notice{background:#eff6ff;border-left:5px solid #2563eb;padding:10px;border-radius:8px;margin:10px 0}
-.locked{background:#fef3c7;border-left:5px solid #d97706}
-table{width:100%;border-collapse:collapse}
-th{background:#1e3a8a;color:white}
-td,th{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
-.vista{display:none}
-.vista.activa{display:block}
-.logout{margin-top:10px;display:none}
-@media(max-width:750px){
-  .grid,.score,.nav{display:grid;grid-template-columns:1fr}
-  .hero h1{font-size:30px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiniela Boboty</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
 <div class="app">
 
-<div class="hero">
-  <h1>Quiniela Boboty</h1>
-  <p>Marcador exacto: 3 puntos. Resultado correcto: 1 punto.</p>
-</div>
+  <header class="hero">
+    <h1>Quiniela Boboty</h1>
+    <p>Marcador exacto: 3 puntos | Resultado correcto: 1 punto</p>
+  </header>
 
-<div class="card">
-  <h2>Ingreso de usuario</h2>
-  <div class="grid">
-    <input id="nombreUsuario" placeholder="Nombre">
-    <input id="pinUsuario" type="password" placeholder="PIN">
-    <button onclick="entrar()">Entrar / Registrarse</button>
-  </div>
+  <section class="card">
+    <h2>Ingreso de usuario</h2>
 
-  <button id="btnCerrarSesion" class="red logout" onclick="cerrarSesion()">
-    Cerrar sesión
-  </button>
-
-  <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN.</div>
-</div>
-
-<div class="nav">
-  <button onclick="mostrarVista('pronosticos')">Pronósticos</button>
-  <button onclick="mostrarVista('ranking')">Ranking</button>
-  <button id="btnAdmin" onclick="mostrarVista('admin')" style="display:none;">Administración</button>
-</div>
-
-<section id="vista-pronosticos" class="vista activa">
-  <div class="card">
-    <h2>Fecha de la jornada</h2>
     <div class="grid">
-      <input type="date" id="fecha" onchange="cargarTodo()">
-      <button class="green" onclick="cargarTodo()">Cargar jornada</button>
+      <input id="nombreUsuario" placeholder="Nombre">
+      <input id="pinUsuario" type="password" placeholder="PIN">
+      <button onclick="entrar()">Entrar / Registrarse</button>
     </div>
-  </div>
 
-  <div class="card">
-    <h2>Partidos del día</h2>
-    <div id="partidos"></div>
-  </div>
-</section>
+    <button id="btnCerrarSesion" class="red logout" onclick="cerrarSesion()">
+      Cerrar sesión
+    </button>
 
-<section id="vista-ranking" class="vista">
-  <div class="card">
-    <h2>Ranking diario</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Posición</th>
-          <th>Usuario</th>
-          <th>Puntos del día</th>
-          <th>Detalle</th>
-        </tr>
-      </thead>
-      <tbody id="ranking"></tbody>
-    </table>
-  </div>
-</section>
+    <div id="usuarioActivo" class="notice">
+      Ingrese su nombre y PIN.
+    </div>
+  </section>
 
-<section id="vista-admin" class="vista">
-  <div class="card">
-    <h2>Importar partidos desde API</h2>
-    <p>Importa o actualiza partidos y resultados desde worldcup26.ir.</p>
-    <button class="green" onclick="importarPartidosAPI()">Importar / actualizar partidos</button>
-  </div>
+  <nav class="nav">
+    <button onclick="mostrarVista('inicio')">Inicio</button>
+    <button onclick="mostrarVista('pronosticos')">Pronósticos</button>
+    <button onclick="mostrarVista('estadisticas')">Estadísticas</button>
+    <button id="btnAdmin" onclick="mostrarVista('admin')" style="display:none;">Administración</button>
+  </nav>
 
-  <div class="card">
-    <h2>Registrar resultados oficiales</h2>
-    <div id="adminResultados"></div>
-  </div>
-</section>
+  <section id="vista-inicio" class="vista activa">
+    <div class="card">
+      <h2>Pantalla principal</h2>
+      <p>Bienvenido a la Quiniela Boboty.</p>
+      <p>Seleccione la fecha, registre sus pronósticos y consulte el ranking diario y global.</p>
+    </div>
+  </section>
+
+  <section id="vista-pronosticos" class="vista">
+    <div class="card">
+      <h2>Fecha de la jornada</h2>
+      <div class="grid">
+        <input type="date" id="fecha" onchange="cargarTodo()">
+        <button class="green" onclick="cargarTodo()">Cargar jornada</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Partidos del día</h2>
+      <div id="partidos"></div>
+    </div>
+  </section>
+
+  <section id="vista-estadisticas" class="vista">
+    <div class="card">
+      <h2>Ranking diario</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Usuario</th>
+            <th>Puntos del día</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody id="rankingDiario"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Ranking global</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Usuario</th>
+            <th>Puntos globales</th>
+            <th>Pronósticos</th>
+          </tr>
+        </thead>
+        <tbody id="rankingGlobal"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Estadísticas generales</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Marcadores exactos</th>
+            <th>Resultados acertados</th>
+            <th>Total puntos</th>
+          </tr>
+        </thead>
+        <tbody id="estadisticas"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="vista-admin" class="vista">
+    <div class="card">
+      <h2>Importar partidos desde API</h2>
+      <p>Importa o actualiza partidos y resultados desde worldcup26.ir.</p>
+      <button class="green" onclick="importarPartidosAPI()">Importar / actualizar partidos</button>
+    </div>
+
+    <div class="card">
+      <h2>Registrar resultados oficiales</h2>
+      <div id="adminResultados"></div>
+    </div>
+  </section>
 
 </div>
 
-<script>
-const SUPABASE_URL = "https://djrntoiunpgcurwvyazk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
-
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let usuario = null;
-
-document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
-
-function mostrarVista(nombre){
-  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
-  document.getElementById("vista-" + nombre).classList.add("activa");
-}
-
-function mostrarBotonCerrarSesion(){
-  document.getElementById("btnCerrarSesion").style.display = "inline-block";
-}
-
-function ocultarBotonCerrarSesion(){
-  document.getElementById("btnCerrarSesion").style.display = "none";
-}
-
-function cerrarSesion(){
-  usuario = null;
-
-  localStorage.removeItem("nombreUsuario");
-  localStorage.removeItem("pinUsuario");
-
-  document.getElementById("nombreUsuario").value = "";
-  document.getElementById("pinUsuario").value = "";
-
-  document.getElementById("usuarioActivo").innerText = "Ingrese su nombre y PIN.";
-
-  document.getElementById("btnAdmin").style.display = "none";
-  ocultarBotonCerrarSesion();
-
-  mostrarVista("pronosticos");
-  cargarTodo();
-}
-
-async function entrar(){
-  const nombre = document.getElementById("nombreUsuario").value.trim();
-  const pin = document.getElementById("pinUsuario").value.trim();
-
-  if(!nombre || !pin){
-    alert("Ingrese nombre y PIN.");
-    return;
-  }
-
-  let {data,error} = await db
-    .from("usuarios")
-    .select("*")
-    .eq("nombre", nombre)
-    .maybeSingle();
-
-  if(!data){
-    const nuevo = await db
-      .from("usuarios")
-      .insert({nombre, pin, rol:"usuario"})
-      .select()
-      .single();
-
-    data = nuevo.data;
-    error = nuevo.error;
-  }else{
-    if(data.pin !== pin){
-      alert("PIN incorrecto.");
-      return;
-    }
-  }
-
-  if(error){
-    alert("Error: " + error.message);
-    return;
-  }
-
-  usuario = data;
-
-  localStorage.setItem("nombreUsuario", nombre);
-  localStorage.setItem("pinUsuario", pin);
-
-  document.getElementById("usuarioActivo").innerText =
-    "Usuario activo: " + usuario.nombre;
-
-  mostrarBotonCerrarSesion();
-
-  document.getElementById("btnAdmin").style.display =
-    usuario.rol === "admin" ? "block" : "none";
-
-  cargarTodo();
-}
-
-function normalizarFecha(valor){
-  if(!valor) return null;
-
-  if(/^\d{4}-\d{2}-\d{2}/.test(valor)){
-    return valor.slice(0,10);
-  }
-
-  if(valor.includes("/")){
-    const partes = valor.split(" ")[0].split("/");
-    if(partes.length === 3){
-      let mes = partes[0];
-      let dia = partes[1];
-      let anio = partes[2];
-      return `${anio}-${mes.padStart(2,"0")}-${dia.padStart(2,"0")}`;
-    }
-  }
-
-  const f = new Date(valor);
-  if(!isNaN(f)) return f.toISOString().slice(0,10);
-
-  return null;
-}
-
-function obtenerCampo(obj, opciones){
-  for(const k of opciones){
-    if(obj[k] !== undefined && obj[k] !== null && obj[k] !== ""){
-      return obj[k];
-    }
-  }
-  return null;
-}
-
-async function importarPartidosAPI(){
-  if(!usuario || usuario.rol !== "admin"){
-    alert("Solo el administrador puede importar partidos.");
-    return;
-  }
-
-  try{
-    const resp = await fetch("https://worldcup26.ir/get/games", {
-      method: "GET",
-      headers: {"Accept": "application/json"}
-    });
-
-    if(!resp.ok){
-      throw new Error("HTTP " + resp.status);
-    }
-
-    const json = await resp.json();
-    const juegos = Array.isArray(json) ? json : (json.games || json.data || json.response || []);
-
-    if(!juegos.length){
-      console.log(json);
-      alert("La API respondió, pero no encontré partidos.");
-      return;
-    }
-
-    let importados = 0;
-
-    for(const g of juegos){
-      const id = String(obtenerCampo(g, ["id","game_id","match_id","_id"]));
-      const fechaRaw = obtenerCampo(g, ["local_date","date","match_date","datetime","utc_date"]);
-      const fecha = normalizarFecha(fechaRaw);
-
-      const equipoA =
-        obtenerCampo(g, ["home_team_name_en","home_team","home","team_a","home_team_label"]) ||
-        "Equipo por definir";
-
-      const equipoB =
-        obtenerCampo(g, ["away_team_name_en","away_team","away","team_b","away_team_label"]) ||
-        "Equipo por definir";
-
-      const marcadorA = obtenerCampo(g, ["home_score","home_goals","score_home","goals_home"]);
-      const marcadorB = obtenerCampo(g, ["away_score","away_goals","score_away","goals_away"]);
-
-      const finalizadoRaw = obtenerCampo(g, ["finished","is_finished","status","match_status"]);
-      const cerrado =
-        finalizadoRaw === true ||
-        finalizadoRaw === "TRUE" ||
-        finalizadoRaw === "true" ||
-        finalizadoRaw === "finished" ||
-        finalizadoRaw === "FT";
-
-      if(!id || !fecha) continue;
-
-      await db.from("partidos").upsert({
-        id,
-        fecha,
-        equipo_a: equipoA,
-        equipo_b: equipoB,
-        goles_a: marcadorA === null ? null : Number(marcadorA),
-        goles_b: marcadorB === null ? null : Number(marcadorB),
-        cerrado
-      }, {onConflict:"id"});
-
-      if(cerrado){
-        await calcularPuntos(id);
-      }
-
-      importados++;
-    }
-
-    alert("Partidos importados o actualizados: " + importados);
-    cargarTodo();
-
-  }catch(e){
-    console.error(e);
-    alert("No se pudo conectar con la API. Revise la consola.");
-  }
-}
-
-async function cargarTodo(){
-  await cargarPartidos();
-  await cargarRanking();
-}
-
-async function cargarPartidos(){
-  const fecha = document.getElementById("fecha").value;
-
-  const {data:partidos,error} = await db
-    .from("partidos")
-    .select("*")
-    .eq("fecha", fecha)
-    .order("id", {ascending:true});
-
-  const contenedor = document.getElementById("partidos");
-  const admin = document.getElementById("adminResultados");
-
-  contenedor.innerHTML = "";
-  admin.innerHTML = "";
-
-  if(error){
-    contenedor.innerHTML = "Error al cargar partidos.";
-    return;
-  }
-
-  if(!partidos || partidos.length === 0){
-    contenedor.innerHTML = "No hay partidos para esta fecha.";
-    admin.innerHTML = "No hay partidos para esta fecha.";
-    return;
-  }
-
-  for(const p of partidos){
-    let pronostico = null;
-
-    if(usuario){
-      const res = await db
-        .from("pronosticos")
-        .select("*")
-        .eq("usuario_id", usuario.id)
-        .eq("partido_id", p.id)
-        .maybeSingle();
-
-      pronostico = res.data;
-    }
-
-    if(pronostico){
-      contenedor.innerHTML += `
-        <div class="match">
-          <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
-          <div class="notice">
-            Resultado oficial:
-            ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
-          </div>
-          <div class="notice locked">
-            Pronóstico registrado: ${pronostico.goles_a} - ${pronostico.goles_b}.
-            No se puede modificar.
-          </div>
-        </div>
-      `;
-    }else{
-      contenedor.innerHTML += `
-        <div class="match">
-          <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
-          <div class="notice">
-            Resultado oficial:
-            ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
-          </div>
-          <div class="score">
-            <div>Su pronóstico</div>
-            <input id="pa_${p.id}" type="number" min="0">
-            <input id="pb_${p.id}" type="number" min="0">
-            <button onclick="guardarPronostico('${p.id}', ${p.cerrado})">Guardar</button>
-          </div>
-        </div>
-      `;
-    }
-
-    admin.innerHTML += `
-      <div class="match">
-        <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
-        <div class="score">
-          <div>Resultado oficial</div>
-          <input id="ra_${p.id}" type="number" min="0" value="${p.goles_a ?? ""}">
-          <input id="rb_${p.id}" type="number" min="0" value="${p.goles_b ?? ""}">
-          <button class="green" onclick="guardarResultado('${p.id}')">Guardar resultado</button>
-        </div>
-      </div>
-    `;
-  }
-}
-
-async function guardarPronostico(partidoId,cerrado){
-  if(!usuario){
-    alert("Primero debe ingresar su usuario.");
-    return;
-  }
-
-  if(cerrado){
-    alert("Este partido ya está cerrado.");
-    return;
-  }
-
-  const existe = await db
-    .from("pronosticos")
-    .select("id")
-    .eq("usuario_id", usuario.id)
-    .eq("partido_id", partidoId)
-    .maybeSingle();
-
-  if(existe.data){
-    alert("Ya registró un pronóstico para este partido. No se puede modificar.");
-    cargarTodo();
-    return;
-  }
-
-  const golesA = document.getElementById("pa_" + partidoId).value;
-  const golesB = document.getElementById("pb_" + partidoId).value;
-
-  if(golesA === "" || golesB === ""){
-    alert("Ingrese ambos marcadores.");
-    return;
-  }
-
-  const {error} = await db
-    .from("pronosticos")
-    .insert({
-      usuario_id: usuario.id,
-      partido_id: partidoId,
-      goles_a: Number(golesA),
-      goles_b: Number(golesB),
-      actualizado_en: new Date().toISOString()
-    });
-
-  if(error){
-    alert("Error: " + error.message);
-    return;
-  }
-
-  alert("Pronóstico guardado. Ya no podrá modificarlo.");
-  cargarTodo();
-}
-
-async function guardarResultado(partidoId){
-  if(!usuario || usuario.rol !== "admin"){
-    alert("Solo el administrador puede registrar resultados.");
-    return;
-  }
-
-  const golesA = document.getElementById("ra_" + partidoId).value;
-  const golesB = document.getElementById("rb_" + partidoId).value;
-
-  if(golesA === "" || golesB === ""){
-    alert("Ingrese ambos resultados.");
-    return;
-  }
-
-  const {error} = await db
-    .from("partidos")
-    .update({
-      goles_a:Number(golesA),
-      goles_b:Number(golesB),
-      cerrado:true
-    })
-    .eq("id", partidoId);
-
-  if(error){
-    alert("Error: " + error.message);
-    return;
-  }
-
-  await calcularPuntos(partidoId);
-
-  alert("Resultado guardado y puntos calculados.");
-  cargarTodo();
-}
-
-async function calcularPuntos(partidoId){
-  const {data:partido} = await db
-    .from("partidos")
-    .select("*")
-    .eq("id", partidoId)
-    .single();
-
-  const {data:pronosticos} = await db
-    .from("pronosticos")
-    .select("*")
-    .eq("partido_id", partidoId);
-
-  if(!partido || !pronosticos) return;
-
-  for(const pr of pronosticos){
-    let puntos = 0;
-
-    const exacto =
-      pr.goles_a === partido.goles_a &&
-      pr.goles_b === partido.goles_b;
-
-    const resultadoPronostico =
-      pr.goles_a > pr.goles_b ? "A" :
-      pr.goles_a < pr.goles_b ? "B" : "E";
-
-    const resultadoReal =
-      partido.goles_a > partido.goles_b ? "A" :
-      partido.goles_a < partido.goles_b ? "B" : "E";
-
-    if(exacto) puntos = 3;
-    else if(resultadoPronostico === resultadoReal) puntos = 1;
-
-    await db
-      .from("pronosticos")
-      .update({puntos})
-      .eq("id", pr.id);
-  }
-}
-
-async function cargarRanking(){
-  const fecha = document.getElementById("fecha").value;
-
-  const {data,error} = await db
-    .from("pronosticos")
-    .select(`
-      puntos,
-      goles_a,
-      goles_b,
-      usuarios(nombre),
-      partidos(fecha, equipo_a, equipo_b, goles_a, goles_b)
-    `)
-    .eq("partidos.fecha", fecha);
-
-  const tbody = document.getElementById("ranking");
-  tbody.innerHTML = "";
-
-  if(error){
-    tbody.innerHTML = "<tr><td colspan='4'>Error cargando ranking.</td></tr>";
-    return;
-  }
-
-  const usuarios = {};
-
-  if(data){
-    data.forEach(item=>{
-      if(!item.usuarios || !item.partidos) return;
-
-      const nombre = item.usuarios.nombre;
-
-      if(!usuarios[nombre]){
-        usuarios[nombre] = {
-          puntos: 0,
-          detalle: []
-        };
-      }
-
-      usuarios[nombre].puntos += item.puntos || 0;
-
-      const resultado =
-        item.partidos.goles_a === null
-          ? "pendiente"
-          : item.partidos.goles_a + "-" + item.partidos.goles_b;
-
-      usuarios[nombre].detalle.push(
-        `${item.partidos.equipo_a} vs ${item.partidos.equipo_b}: ` +
-        `pronóstico ${item.goles_a}-${item.goles_b}, ` +
-        `resultado ${resultado}, ` +
-        `${item.puntos || 0} pts`
-      );
-    });
-  }
-
-  const ranking = Object.entries(usuarios)
-    .sort((a,b)=>b[1].puntos-a[1].puntos);
-
-  if(ranking.length === 0){
-    tbody.innerHTML = "<tr><td colspan='4'>No hay puntos registrados todavía.</td></tr>";
-    return;
-  }
-
-  ranking.forEach((r,index)=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${r[0]}</td>
-        <td><strong>${r[1].puntos}</strong></td>
-        <td>${r[1].detalle.join("<br>")}</td>
-      </tr>
-    `;
-  });
-}
-
-const nombreGuardado = localStorage.getItem("nombreUsuario");
-const pinGuardado = localStorage.getItem("pinUsuario");
-
-if(nombreGuardado && pinGuardado){
-  document.getElementById("nombreUsuario").value = nombreGuardado;
-  document.getElementById("pinUsuario").value = pinGuardado;
-  mostrarBotonCerrarSesion();
-}
-
-cargarTodo();
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
