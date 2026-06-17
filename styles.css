@@ -124,6 +124,26 @@ button:hover{
   border-left:5px solid #d97706;
 }
 
+.detalle-partido{
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:8px;
+  margin-bottom:6px;
+}
+
+.detalle-partido strong{
+  display:block;
+  color:#1e3a8a;
+  margin-bottom:4px;
+}
+
+.detalle-partido span{
+  display:block;
+  font-size:14px;
+  line-height:1.4;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
