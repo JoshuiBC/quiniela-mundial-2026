@@ -14,6 +14,32 @@ const fechaHoy =
 
 document.getElementById("fecha").value = fechaHoy;
 
+function formatearFechaLocal(fecha){
+  return fecha.getFullYear() + "-" +
+    String(fecha.getMonth() + 1).padStart(2, "0") + "-" +
+    String(fecha.getDate()).padStart(2, "0");
+}
+
+function crearFechaLocal(valor){
+  const partes = String(valor || "").split("-");
+
+  if(partes.length !== 3){
+    return new Date();
+  }
+
+  return new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+}
+
+function cambiarFecha(dias){
+  const input = document.getElementById("fecha");
+  const fecha = crearFechaLocal(input.value || fechaHoy);
+
+  fecha.setDate(fecha.getDate() + dias);
+  input.value = formatearFechaLocal(fecha);
+
+  cargarTodo();
+}
+
 function mostrarVista(nombre){
   document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
   document.getElementById("vista-" + nombre).classList.add("activa");
@@ -127,6 +153,208 @@ function obtenerCampo(obj, opciones){
     }
   }
   return null;
+}
+
+const CODIGOS_PAISES = {
+  alg: "DZ",
+  algeria: "DZ",
+  argelia: "DZ",
+  arg: "AR",
+  argentina: "AR",
+  aus: "AU",
+  australia: "AU",
+  aut: "AT",
+  austria: "AT",
+  bel: "BE",
+  belgium: "BE",
+  belgica: "BE",
+  bih: "BA",
+  "bosnia and herzegovina": "BA",
+  bosnia: "BA",
+  "bosnia y herzegovina": "BA",
+  bol: "BO",
+  bolivia: "BO",
+  bra: "BR",
+  brazil: "BR",
+  brasil: "BR",
+  can: "CA",
+  canada: "CA",
+  cpv: "CV",
+  "cape verde": "CV",
+  "cabo verde": "CV",
+  civ: "CI",
+  "cote d'ivoire": "CI",
+  "ivory coast": "CI",
+  "costa de marfil": "CI",
+  col: "CO",
+  colombia: "CO",
+  crc: "CR",
+  "costa rica": "CR",
+  cro: "HR",
+  croatia: "HR",
+  croacia: "HR",
+  cur: "CW",
+  curacao: "CW",
+  cze: "CZ",
+  czechia: "CZ",
+  "czech republic": "CZ",
+  "republica checa": "CZ",
+  cod: "CD",
+  "congo dr": "CD",
+  "congo, dr": "CD",
+  "dr congo": "CD",
+  "democratic republic congo": "CD",
+  "democratic republic of the congo": "CD",
+  "republica democratica del congo": "CD",
+  den: "DK",
+  denmark: "DK",
+  dinamarca: "DK",
+  ecu: "EC",
+  ecuador: "EC",
+  egy: "EG",
+  egypt: "EG",
+  egipto: "EG",
+  eng: "GB",
+  england: "GB",
+  inglaterra: "GB",
+  fra: "FR",
+  france: "FR",
+  francia: "FR",
+  ger: "DE",
+  germany: "DE",
+  alemania: "DE",
+  gha: "GH",
+  ghana: "GH",
+  hai: "HT",
+  haiti: "HT",
+  hon: "HN",
+  honduras: "HN",
+  irn: "IR",
+  iran: "IR",
+  "ir iran": "IR",
+  irq: "IQ",
+  iraq: "IQ",
+  irak: "IQ",
+  jpn: "JP",
+  japan: "JP",
+  japon: "JP",
+  jor: "JO",
+  jordan: "JO",
+  jordania: "JO",
+  kor: "KR",
+  "south korea": "KR",
+  "korea republic": "KR",
+  "republic of korea": "KR",
+  "corea del sur": "KR",
+  mar: "MA",
+  morocco: "MA",
+  marruecos: "MA",
+  mex: "MX",
+  mexico: "MX",
+  ned: "NL",
+  netherlands: "NL",
+  "paises bajos": "NL",
+  nga: "NG",
+  nigeria: "NG",
+  nor: "NO",
+  norway: "NO",
+  noruega: "NO",
+  nzl: "NZ",
+  "new zealand": "NZ",
+  "nueva zelanda": "NZ",
+  pan: "PA",
+  panama: "PA",
+  par: "PY",
+  paraguay: "PY",
+  per: "PE",
+  peru: "PE",
+  por: "PT",
+  portugal: "PT",
+  qat: "QA",
+  qatar: "QA",
+  ksa: "SA",
+  "saudi arabia": "SA",
+  "arabia saudita": "SA",
+  sen: "SN",
+  senegal: "SN",
+  srb: "RS",
+  serbia: "RS",
+  swe: "SE",
+  sweden: "SE",
+  suecia: "SE",
+  rsa: "ZA",
+  "south africa": "ZA",
+  sudafrica: "ZA",
+  sco: "GB",
+  scotland: "GB",
+  escocia: "GB",
+  esp: "ES",
+  spain: "ES",
+  espana: "ES",
+  sui: "CH",
+  switzerland: "CH",
+  suiza: "CH",
+  tun: "TN",
+  tunisia: "TN",
+  tunez: "TN",
+  tur: "TR",
+  turkey: "TR",
+  turkiye: "TR",
+  turquia: "TR",
+  uae: "AE",
+  "united arab emirates": "AE",
+  "emiratos arabes unidos": "AE",
+  ukr: "UA",
+  ukraine: "UA",
+  ucrania: "UA",
+  uru: "UY",
+  uruguay: "UY",
+  usa: "US",
+  "united states": "US",
+  "united states of america": "US",
+  "estados unidos": "US",
+  uzb: "UZ",
+  uzbekistan: "UZ"
+};
+
+function normalizarNombreEquipo(nombre){
+  return String(nombre || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’‘`]/g, "'")
+    .replace(/[.,]/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function obtenerCodigoPais(nombre){
+  const nombreNormalizado = normalizarNombreEquipo(nombre);
+  return CODIGOS_PAISES[nombreNormalizado] || "";
+}
+
+function mostrarEquipo(nombre){
+  const codigo = obtenerCodigoPais(nombre);
+  const texto = nombre || "Equipo por definir";
+
+  if(!codigo){
+    return '<span class="team-name">' + texto + '</span>';
+  }
+
+  const codigoImg = codigo.toLowerCase();
+
+  return '<span class="team-name">' +
+    '<img class="team-flag" src="https://flagcdn.com/w40/' + codigoImg + '.png" alt="Bandera de ' + texto + '" loading="lazy">' +
+    '<span>' + texto + '</span>' +
+    '</span>';
+}
+
+function mostrarPartido(equipoA, equipoB){
+  return '<span class="match-teams">' +
+    mostrarEquipo(equipoA) +
+    '<span class="match-vs">vs</span>' +
+    mostrarEquipo(equipoB) +
+    '</span>';
 }
 
 async function importarPartidosAPI(){
@@ -270,7 +498,7 @@ async function cargarPartidos(){
     if(pronostico){
       contenedor.innerHTML += `
         <div class="match">
-          <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
+          <div class="match-title">${mostrarPartido(p.equipo_a, p.equipo_b)}</div>
           <div class="notice">
             Resultado oficial:
             ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
@@ -284,7 +512,7 @@ async function cargarPartidos(){
     }else{
       contenedor.innerHTML += `
         <div class="match">
-          <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
+          <div class="match-title">${mostrarPartido(p.equipo_a, p.equipo_b)}</div>
           <div class="notice">
             Resultado oficial:
             ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
@@ -301,7 +529,7 @@ async function cargarPartidos(){
 
     admin.innerHTML += `
       <div class="match">
-        <div class="match-title">${p.equipo_a} vs ${p.equipo_b}</div>
+        <div class="match-title">${mostrarPartido(p.equipo_a, p.equipo_b)}</div>
         <div class="score">
           <div>Resultado oficial</div>
           <input id="ra_${p.id}" type="number" min="0" value="${p.goles_a ?? ""}">
@@ -499,7 +727,7 @@ async function cargarRankingDiario(){
 
       usuarios[nombre].detalle.push(`
         <div class="detalle-partido">
-          <strong>${item.partidos.equipo_a} vs ${item.partidos.equipo_b}</strong>
+          <strong>${mostrarPartido(item.partidos.equipo_a, item.partidos.equipo_b)}</strong>
           <span>Pronóstico: ${item.goles_a}-${item.goles_b}</span>
           <span>Resultado: ${resultado}</span>
           <span>Puntos: ${item.puntos || 0}</span>

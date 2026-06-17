@@ -45,8 +45,10 @@
   <section id="vista-pronosticos" class="vista">
     <div class="card">
       <h2>Fecha de la jornada</h2>
-      <div class="grid">
-        <input id="fecha" type="text" placeholder="2026-06-16">
+      <div class="date-grid">
+        <button class="date-nav" onclick="cambiarFecha(-1)">Dia anterior</button>
+        <input id="fecha" type="date">
+        <button class="date-nav" onclick="cambiarFecha(1)">Dia siguiente</button>
         <button class="green" onclick="cargarTodo()">Cargar jornada</button>
       </div>
     </div>
