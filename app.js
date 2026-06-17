@@ -394,24 +394,36 @@ async function calcularPuntos(partidoId){
   if(!partido || !pronosticos) return;
 
   for(const pr of pronosticos){
+
     let puntos = 0;
 
-    const marcadorExacto =
+    const exacto =
       Number(pr.goles_a) === Number(partido.goles_a) &&
       Number(pr.goles_b) === Number(partido.goles_b);
 
-    if(marcadorExacto){
+    const resultadoPronostico =
+      Number(pr.goles_a) > Number(pr.goles_b)
+        ? "LOCAL"
+        : Number(pr.goles_a) < Number(pr.goles_b)
+        ? "VISITA"
+        : "EMPATE";
+
+    const resultadoReal =
+      Number(partido.goles_a) > Number(partido.goles_b)
+        ? "LOCAL"
+        : Number(partido.goles_a) < Number(partido.goles_b)
+        ? "VISITA"
+        : "EMPATE";
+
+    if(exacto){
       puntos = 3;
-    }else if(
-      Number(pr.goles_a) === Number(partido.goles_a) ||
-      Number(pr.goles_b) === Number(partido.goles_b)
-    ){
+    }else if(resultadoPronostico === resultadoReal){
       puntos = 1;
     }
 
     await db
       .from("pronosticos")
-      .update({puntos})
+      .update({ puntos })
       .eq("id", pr.id);
   }
 }
