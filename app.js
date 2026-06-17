@@ -463,12 +463,14 @@ async function cargarRankingDiario(){
           ? "pendiente"
           : item.partidos.goles_a + "-" + item.partidos.goles_b;
 
-      usuarios[nombre].detalle.push(
-        `${item.partidos.equipo_a} vs ${item.partidos.equipo_b}: ` +
-        `pronóstico ${item.goles_a}-${item.goles_b}, ` +
-        `resultado ${resultado}, ` +
-        `${item.puntos || 0} pts`
-      );
+      usuarios[nombre].detalle.push(`
+        <div class="detalle-partido">
+          <strong>${item.partidos.equipo_a} vs ${item.partidos.equipo_b}</strong>
+          <span>Pronóstico: ${item.goles_a}-${item.goles_b}</span>
+          <span>Resultado: ${resultado}</span>
+          <span>Puntos: ${item.puntos || 0}</span>
+        </div>
+      `);
     });
   }
 
@@ -486,7 +488,7 @@ async function cargarRankingDiario(){
         <td data-label="Posición">${index + 1}</td>
         <td data-label="Usuario">${r[0]}</td>
         <td data-label="Puntos del día"><strong>${r[1].puntos}</strong></td>
-        <td data-label="Detalle">${r[1].detalle.join("<br>")}</td>
+        <td data-label="Detalle">${r[1].detalle.join("")}</td>
       </tr>
     `;
   });
