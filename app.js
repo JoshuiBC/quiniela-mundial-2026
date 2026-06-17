@@ -5,7 +5,14 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuario = null;
 
-document.getElementById("fecha").value = "2026-06-16";
+const hoy = new Date();
+
+const fechaHoy =
+  hoy.getFullYear() + "-" +
+  String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+  String(hoy.getDate()).padStart(2, "0");
+
+document.getElementById("fecha").value = fechaHoy;
 
 function mostrarVista(nombre){
   document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
