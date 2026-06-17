@@ -5,7 +5,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuario = null;
 
-document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+document.getElementById("fecha").value = "2026-06-16";
 
 function mostrarVista(nombre){
   document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
@@ -25,6 +25,7 @@ function ocultarBotonCerrarSesion(){
 
 function cerrarSesion(){
   usuario = null;
+
   localStorage.removeItem("nombreUsuario");
   localStorage.removeItem("pinUsuario");
 
@@ -208,7 +209,7 @@ async function cargarTodo(){
 }
 
 async function cargarPartidos(){
-  const fecha = document.getElementById("fecha").value;
+  const fecha = document.getElementById("fecha").value.trim();
 
   const {data:partidos,error} = await db
     .from("partidos")
@@ -424,7 +425,7 @@ async function cargarRanking(){
 }
 
 async function cargarRankingDiario(){
-  const fecha = document.getElementById("fecha").value;
+  const fecha = document.getElementById("fecha").value.trim();
 
   const {data,error} = await db
     .from("pronosticos")
