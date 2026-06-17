@@ -18,20 +18,13 @@
 
   <section class="card">
     <h2>Ingreso de usuario</h2>
-
     <div class="grid">
       <input id="nombreUsuario" placeholder="Nombre">
       <input id="pinUsuario" type="password" placeholder="PIN">
       <button onclick="entrar()">Entrar / Registrarse</button>
     </div>
-
-    <button id="btnCerrarSesion" class="red logout" onclick="cerrarSesion()">
-      Cerrar sesión
-    </button>
-
-    <div id="usuarioActivo" class="notice">
-      Ingrese su nombre y PIN.
-    </div>
+    <button id="btnCerrarSesion" class="red logout" onclick="cerrarSesion()">Cerrar sesión</button>
+    <div id="usuarioActivo" class="notice">Ingrese su nombre y PIN.</div>
   </section>
 
   <nav class="nav">
@@ -45,7 +38,7 @@
     <div class="card">
       <h2>Pantalla principal</h2>
       <p>Bienvenido a la Quiniela Boboty.</p>
-      <p>Seleccione la fecha, registre sus pronósticos y consulte el ranking diario y global.</p>
+      <p>Registre sus pronósticos, consulte el ranking diario y revise el acumulado global.</p>
     </div>
   </section>
 
@@ -53,7 +46,7 @@
     <div class="card">
       <h2>Fecha de la jornada</h2>
       <div class="grid">
-        <input type="date" id="fecha" onchange="cargarTodo()">
+        <input id="fecha" type="text" placeholder="2026-06-16">
         <button class="green" onclick="cargarTodo()">Cargar jornada</button>
       </div>
     </div>
