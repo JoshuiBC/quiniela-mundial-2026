@@ -396,20 +396,18 @@ async function calcularPuntos(partidoId){
   for(const pr of pronosticos){
     let puntos = 0;
 
-    const exacto =
-      pr.goles_a === partido.goles_a &&
-      pr.goles_b === partido.goles_b;
+    const marcadorExacto =
+      Number(pr.goles_a) === Number(partido.goles_a) &&
+      Number(pr.goles_b) === Number(partido.goles_b);
 
-    const resultadoPronostico =
-      pr.goles_a > pr.goles_b ? "A" :
-      pr.goles_a < pr.goles_b ? "B" : "E";
-
-    const resultadoReal =
-      partido.goles_a > partido.goles_b ? "A" :
-      partido.goles_a < partido.goles_b ? "B" : "E";
-
-    if(exacto) puntos = 3;
-    else if(resultadoPronostico === resultadoReal) puntos = 1;
+    if(marcadorExacto){
+      puntos = 3;
+    }else if(
+      Number(pr.goles_a) === Number(partido.goles_a) ||
+      Number(pr.goles_b) === Number(partido.goles_b)
+    ){
+      puntos = 1;
+    }
 
     await db
       .from("pronosticos")
