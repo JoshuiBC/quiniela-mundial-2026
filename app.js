@@ -150,6 +150,7 @@ async function importarPartidosAPI(){
     }
 
     let importados = 0;
+    let ignorados = 0;
 
     for(const g of juegos){
       const id = String(obtenerCampo(g, ["id","game_id","match_id","_id"]));
@@ -177,6 +178,17 @@ async function importarPartidosAPI(){
 
       if(!id || !fecha) continue;
 
+      const { data: existente } = await db
+        .from("partidos")
+        .select("cerrado")
+        .eq("id", id)
+        .maybeSingle();
+
+      if(existente?.cerrado){
+        ignorados++;
+        continue;
+      }
+
       await db.from("partidos").upsert({
         id,
         fecha,
@@ -194,7 +206,7 @@ async function importarPartidosAPI(){
       importados++;
     }
 
-    alert("Partidos importados o actualizados: " + importados);
+    alert("Partidos actualizados: " + importados + ". Cerrados ignorados: " + ignorados + ".");
     cargarTodo();
 
   }catch(e){
@@ -393,8 +405,11 @@ async function calcularPuntos(partidoId){
 
   if(!partido || !pronosticos) return;
 
-  for(const pr of pronosticos){
+  if(partido.goles_a === null || partido.goles_b === null){
+    return;
+  }
 
+  for(const pr of pronosticos){
     let puntos = 0;
 
     const exacto =
@@ -403,17 +418,17 @@ async function calcularPuntos(partidoId){
 
     const resultadoPronostico =
       Number(pr.goles_a) > Number(pr.goles_b)
-        ? "LOCAL"
+        ? "A"
         : Number(pr.goles_a) < Number(pr.goles_b)
-        ? "VISITA"
-        : "EMPATE";
+        ? "B"
+        : "E";
 
     const resultadoReal =
       Number(partido.goles_a) > Number(partido.goles_b)
-        ? "LOCAL"
+        ? "A"
         : Number(partido.goles_a) < Number(partido.goles_b)
-        ? "VISITA"
-        : "EMPATE";
+        ? "B"
+        : "E";
 
     if(exacto){
       puntos = 3;
