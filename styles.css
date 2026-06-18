@@ -72,6 +72,7 @@ html,body{
 .date-grid input[type="date"]{
   display:block;
   grid-column:2;
+  box-sizing:border-box;
   width:100%;
   max-width:100%;
   min-width:0;
@@ -82,6 +83,19 @@ html,body{
   min-height:46px;
   line-height:1.2;
   color-scheme:light;
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+.date-grid input[type="date"]::-webkit-date-and-time-value{
+  margin:0;
+  padding:0;
+  text-align:center;
+}
+
+.date-grid input[type="date"]::-webkit-calendar-picker-indicator{
+  margin:0;
+  padding:0;
 }
 
 .date-grid .date-nav:first-child{
@@ -348,14 +362,17 @@ td,th{
   .date-grid input[type="date"]{
     grid-column:1 / -1;
     order:1;
+    box-sizing:border-box;
     width:100%;
     max-width:100%;
     min-width:0;
     inline-size:100%;
     max-inline-size:100%;
     min-inline-size:0;
+    justify-self:stretch;
+    font-size:15px;
     text-align:center;
-    padding:10px 8px;
+    padding:10px 6px;
   }
 
   .date-grid .date-nav:first-child{
