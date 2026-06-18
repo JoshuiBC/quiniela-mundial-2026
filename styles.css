@@ -152,6 +152,11 @@ button:hover{
   flex:0 0 auto;
 }
 
+.team-code{
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
 .match-vs{
   color:#64748b;
   font-size:.85em;

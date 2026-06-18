@@ -317,6 +317,65 @@ const CODIGOS_PAISES = {
   uzbekistan: "UZ"
 };
 
+const SIGLAS_PAISES = {
+  AE: "UAE",
+  AR: "ARG",
+  AT: "AUT",
+  AU: "AUS",
+  BA: "BIH",
+  BE: "BEL",
+  BO: "BOL",
+  BR: "BRA",
+  CA: "CAN",
+  CD: "COD",
+  CH: "SUI",
+  CI: "CIV",
+  CO: "COL",
+  CR: "CRC",
+  CV: "CPV",
+  CW: "CUR",
+  CZ: "CZE",
+  DE: "GER",
+  DK: "DEN",
+  DZ: "ALG",
+  EC: "ECU",
+  EG: "EGY",
+  ES: "ESP",
+  FR: "FRA",
+  GB: "ENG",
+  GH: "GHA",
+  HN: "HON",
+  HR: "CRO",
+  HT: "HAI",
+  IQ: "IRQ",
+  IR: "IRN",
+  JO: "JOR",
+  JP: "JPN",
+  KR: "KOR",
+  MA: "MAR",
+  MX: "MEX",
+  NG: "NGA",
+  NL: "NED",
+  NO: "NOR",
+  NZ: "NZL",
+  PA: "PAN",
+  PE: "PER",
+  PT: "POR",
+  PY: "PAR",
+  QA: "QAT",
+  RS: "SRB",
+  SA: "KSA",
+  SE: "SWE",
+  SN: "SEN",
+  TN: "TUN",
+  TR: "TUR",
+  UA: "UKR",
+  US: "USA",
+  UY: "URU",
+  UZ: "UZB",
+  ZA: "RSA"
+};
+
 function normalizarNombreEquipo(nombre){
   return String(nombre || "")
     .trim()
@@ -333,6 +392,10 @@ function obtenerCodigoPais(nombre){
   return CODIGOS_PAISES[nombreNormalizado] || "";
 }
 
+function obtenerSiglaPais(codigo){
+  return SIGLAS_PAISES[codigo] || codigo;
+}
+
 function mostrarEquipo(nombre){
   const codigo = obtenerCodigoPais(nombre);
   const texto = nombre || "Equipo por definir";
@@ -342,10 +405,11 @@ function mostrarEquipo(nombre){
   }
 
   const codigoImg = codigo.toLowerCase();
+  const sigla = obtenerSiglaPais(codigo);
 
   return '<span class="team-name">' +
     '<img class="team-flag" src="https://flagcdn.com/w40/' + codigoImg + '.png" alt="Bandera de ' + texto + '" loading="lazy">' +
-    '<span>' + texto + '</span>' +
+    '<span class="team-code" title="' + texto + '">' + sigla + '</span>' +
     '</span>';
 }
 
