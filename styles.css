@@ -64,12 +64,13 @@ html,body{
 
 .date-grid{
   display:grid;
-  grid-template-columns:140px minmax(180px,1fr) 140px auto;
+  grid-template-columns:52px minmax(180px,1fr) 52px auto;
   gap:10px;
   align-items:center;
 }
 
 .date-grid input[type="date"]{
+  display:block;
   min-height:46px;
   line-height:1.2;
   color-scheme:light;
@@ -111,6 +112,9 @@ button:hover{
 
 .date-nav{
   background:#334155;
+  font-size:20px;
+  line-height:1;
+  padding:12px 8px;
 }
 
 .date-nav:hover{
@@ -318,26 +322,9 @@ td,th{
   }
 
   .date-grid{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:48px minmax(0,1fr) 48px;
   }
 
-  .date-grid input{
-    order:1;
-  }
-
-  .date-grid .date-nav:first-child{
-    order:2;
-  }
-
-  .date-grid .date-nav:nth-of-type(2){
-    order:3;
-  }
-
-  .date-grid .green{
-    order:4;
-  }
-
-  .date-grid input,
   .date-grid .green{
     grid-column:1 / -1;
   }
@@ -461,18 +448,11 @@ td,th{
     font-size:24px;
   }
 
-  .nav button,
-  .date-nav{
+  .nav button{
     font-size:13px;
   }
 
   .date-grid{
-    grid-template-columns:1fr;
-  }
-
-  .date-grid input,
-  .date-grid .date-nav,
-  .date-grid .green{
-    grid-column:auto;
+    grid-template-columns:44px minmax(0,1fr) 44px;
   }
 }
