@@ -73,7 +73,12 @@ html,body{
   display:block;
   grid-column:2;
   width:100%;
+  max-width:100%;
   min-width:0;
+  inline-size:100%;
+  max-inline-size:100%;
+  min-inline-size:0;
+  justify-self:stretch;
   min-height:46px;
   line-height:1.2;
   color-scheme:light;
@@ -343,7 +348,14 @@ td,th{
   .date-grid input[type="date"]{
     grid-column:1 / -1;
     order:1;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    inline-size:100%;
+    max-inline-size:100%;
+    min-inline-size:0;
     text-align:center;
+    padding:10px 8px;
   }
 
   .date-grid .date-nav:first-child{
