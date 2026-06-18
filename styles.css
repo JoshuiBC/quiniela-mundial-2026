@@ -191,9 +191,26 @@ button:hover{
 }
 
 .detalle-partido strong{
-  display:block;
+  display:flex;
+  align-items:center;
   color:#1e3a8a;
   margin-bottom:4px;
+}
+
+.detalle-partido .match-teams{
+  display:inline-flex;
+  align-items:center;
+  flex-wrap:nowrap;
+}
+
+.detalle-partido .team-name{
+  display:inline-flex;
+  flex:0 0 auto;
+}
+
+.detalle-partido .match-vs,
+.detalle-partido .team-code{
+  display:inline;
 }
 
 .detalle-partido span{
@@ -401,7 +418,19 @@ td,th{
   }
 
   .detalle-partido{
-    padding:8px;
+    padding:6px 8px;
+  }
+
+  .detalle-partido strong{
+    margin-bottom:3px;
+  }
+
+  .detalle-partido .match-teams{
+    gap:5px;
+  }
+
+  .detalle-partido span{
+    font-size:13px;
   }
 }
 
