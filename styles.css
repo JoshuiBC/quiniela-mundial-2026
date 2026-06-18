@@ -337,11 +337,28 @@ td,th{
   }
 
   .date-grid{
-    grid-template-columns:48px minmax(0,1fr) 48px;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .date-grid input[type="date"]{
+    grid-column:1 / -1;
+    order:1;
+    text-align:center;
+  }
+
+  .date-grid .date-nav:first-child{
+    grid-column:1;
+    order:2;
+  }
+
+  .date-grid .date-nav:nth-of-type(2){
+    grid-column:2;
+    order:2;
   }
 
   .date-grid .green{
     grid-column:1 / -1;
+    order:3;
   }
 
   input,
@@ -468,6 +485,6 @@ td,th{
   }
 
   .date-grid{
-    grid-template-columns:44px minmax(0,1fr) 44px;
+    grid-template-columns:1fr 1fr;
   }
 }
