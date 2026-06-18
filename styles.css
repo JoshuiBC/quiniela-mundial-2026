@@ -64,16 +64,31 @@ html,body{
 
 .date-grid{
   display:grid;
-  grid-template-columns:52px minmax(180px,1fr) 52px auto;
+  grid-template-columns:52px minmax(0,1fr) 52px auto;
   gap:10px;
   align-items:center;
 }
 
 .date-grid input[type="date"]{
   display:block;
+  grid-column:2;
+  width:100%;
+  min-width:0;
   min-height:46px;
   line-height:1.2;
   color-scheme:light;
+}
+
+.date-grid .date-nav:first-child{
+  grid-column:1;
+}
+
+.date-grid .date-nav:nth-of-type(2){
+  grid-column:3;
+}
+
+.date-grid .green{
+  grid-column:4;
 }
 
 input,button{
