@@ -22,24 +22,26 @@ html,body{
 
 .hero{
   display:grid;
-  grid-template-columns:150px minmax(0,1fr);
-  gap:24px;
+  grid-template-columns:132px minmax(0,1fr);
+  gap:18px;
   align-items:center;
   background:linear-gradient(135deg,#0f766e,#1d4ed8);
   color:white;
-  padding:24px;
-  border-radius:22px;
+  padding:18px;
+  border-radius:18px;
   margin-bottom:20px;
 }
 
 .hero-logo{
-  width:150px;
-  aspect-ratio:1;
+  width:132px;
+  height:132px;
+  max-width:132px;
+  max-height:132px;
   display:block;
   object-fit:cover;
-  border-radius:18px;
-  border:3px solid rgba(255,255,255,.82);
-  box-shadow:0 14px 28px rgba(15,23,42,.28);
+  border-radius:14px;
+  border:2px solid rgba(255,255,255,.82);
+  box-shadow:0 10px 22px rgba(15,23,42,.24);
 }
 
 .hero-copy{
@@ -48,7 +50,7 @@ html,body{
 
 .hero h1{
   margin:0;
-  font-size:42px;
+  font-size:38px;
 }
 
 .hero p{
@@ -317,15 +319,18 @@ td,th{
   }
 
   .hero{
-    grid-template-columns:86px minmax(0,1fr);
+    grid-template-columns:76px minmax(0,1fr);
     gap:12px;
-    padding:18px;
+    padding:14px;
     border-radius:16px;
     margin-bottom:12px;
   }
 
   .hero-logo{
-    width:86px;
+    width:76px;
+    height:76px;
+    max-width:76px;
+    max-height:76px;
     border-radius:12px;
     border-width:2px;
     box-shadow:0 8px 18px rgba(15,23,42,.22);
@@ -533,11 +538,14 @@ td,th{
 
 @media(max-width:380px){
   .hero{
-    grid-template-columns:72px minmax(0,1fr);
+    grid-template-columns:64px minmax(0,1fr);
   }
 
   .hero-logo{
-    width:72px;
+    width:64px;
+    height:64px;
+    max-width:64px;
+    max-height:64px;
   }
 
   .hero h1{
