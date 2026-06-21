@@ -261,6 +261,9 @@ function partidoEstaFinalizado(valor){
   if(!estado) return false;
 
   return [
+    "true",
+    "yes",
+    "1",
     "ft",
     "full time",
     "finished",
@@ -612,7 +615,8 @@ async function sincronizarPartidosAPI(opciones = {}){
         "status_name",
         "state",
         "game_status",
-        "fixture_status"
+        "fixture_status",
+        "time_elapsed"
       ]);
       const cerrado = partidoEstaFinalizado(finalizadoRaw) && golesA !== null && golesB !== null;
 
