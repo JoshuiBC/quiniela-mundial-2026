@@ -12,6 +12,7 @@ let apiSyncFallos = 0;
 const API_SYNC_INTERVALO_MS = 5 * 60 * 1000;
 const API_SYNC_REINTENTO_BASE_MS = 30 * 1000;
 const API_SYNC_REINTENTO_MAX_MS = 15 * 60 * 1000;
+const PARTIDOS_ANULADOS = new Set(["35"]);
 
 const hoy = new Date();
 
@@ -36,6 +37,10 @@ function crearFechaLocal(valor){
   }
 
   return new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+}
+
+function partidoAnulado(partidoId){
+  return PARTIDOS_ANULADOS.has(String(partidoId));
 }
 
 function cambiarFecha(dias){
@@ -740,6 +745,10 @@ async function cargarPartidos(){
 
   for(const p of partidos){
     let pronostico = null;
+    const anulado = partidoAnulado(p.id);
+    const avisoAnulado = anulado
+      ? `<div class="notice locked">Partido anulado por acuerdo del grupo. No cuenta para ranking ni estadisticas.</div>`
+      : "";
 
     if(usuario){
       const res = await db
@@ -760,6 +769,7 @@ async function cargarPartidos(){
             Resultado oficial:
             ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
           </div>
+          ${avisoAnulado}
           <div class="notice locked">
             Pronóstico registrado: ${pronostico.goles_a} - ${pronostico.goles_b}.
             No se puede modificar.
@@ -774,11 +784,12 @@ async function cargarPartidos(){
             Resultado oficial:
             ${p.goles_a === null ? "Pendiente" : p.goles_a + " - " + p.goles_b}
           </div>
+          ${avisoAnulado}
           <div class="score">
             <div>Su pronóstico</div>
-            <input id="pa_${p.id}" type="number" min="0">
-            <input id="pb_${p.id}" type="number" min="0">
-            <button onclick="guardarPronostico('${p.id}', ${p.cerrado})">Guardar</button>
+            <input id="pa_${p.id}" type="number" min="0" ${anulado ? "disabled" : ""}>
+            <input id="pb_${p.id}" type="number" min="0" ${anulado ? "disabled" : ""}>
+            <button onclick="guardarPronostico('${p.id}', ${p.cerrado})" ${anulado ? "disabled" : ""}>Guardar</button>
           </div>
         </div>
       `;
@@ -787,6 +798,7 @@ async function cargarPartidos(){
     admin.innerHTML += `
       <div class="match">
         <div class="match-title">${mostrarPartido(p.equipo_a, p.equipo_b)}</div>
+        ${avisoAnulado}
         <div class="score">
           <div>Resultado oficial</div>
           <input id="ra_${p.id}" type="number" min="0" value="${p.goles_a ?? ""}">
@@ -801,6 +813,11 @@ async function cargarPartidos(){
 async function guardarPronostico(partidoId,cerrado){
   if(!usuario){
     alert("Primero debe ingresar su usuario.");
+    return;
+  }
+
+  if(partidoAnulado(partidoId)){
+    alert("Este partido fue anulado por acuerdo del grupo y no cuenta para la quiniela.");
     return;
   }
 
@@ -911,6 +928,21 @@ async function calcularPuntos(partidoId){
 
   if(!partido || !pronosticos) return;
 
+  if(partidoAnulado(partidoId)){
+    for(const pr of pronosticos){
+      const {error: puntosError} = await db
+        .from("pronosticos")
+        .update({ puntos:0 })
+        .eq("id", pr.id);
+
+      if(puntosError){
+        throw puntosError;
+      }
+    }
+
+    return;
+  }
+
   if(partido.goles_a === null || partido.goles_b === null){
     return;
   }
@@ -966,6 +998,7 @@ async function cargarRankingDiario(){
     .from("pronosticos")
     .select(`
       puntos,
+      partido_id,
       goles_a,
       goles_b,
       usuarios(nombre),
@@ -986,6 +1019,7 @@ async function cargarRankingDiario(){
   if(data){
     data.forEach(item=>{
       if(!item.usuarios || !item.partidos) return;
+      if(partidoAnulado(item.partido_id)) return;
 
       const nombre = item.usuarios.nombre;
 
@@ -1036,6 +1070,7 @@ async function cargarRankingGlobal(){
     .from("pronosticos")
     .select(`
       puntos,
+      partido_id,
       usuarios(nombre)
     `);
 
@@ -1052,6 +1087,7 @@ async function cargarRankingGlobal(){
   if(data){
     data.forEach(item=>{
       if(!item.usuarios) return;
+      if(partidoAnulado(item.partido_id)) return;
 
       const nombre = item.usuarios.nombre;
 
@@ -1089,6 +1125,7 @@ async function cargarEstadisticas(){
     .from("pronosticos")
     .select(`
       puntos,
+      partido_id,
       usuarios(nombre)
     `);
 
@@ -1105,6 +1142,7 @@ async function cargarEstadisticas(){
   if(data){
     data.forEach(item=>{
       if(!item.usuarios) return;
+      if(partidoAnulado(item.partido_id)) return;
 
       const nombre = item.usuarios.nombre;
 
