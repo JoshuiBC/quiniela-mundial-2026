@@ -150,22 +150,16 @@ async function entrar(){
     .eq("nombre", nombre)
     .maybeSingle();
 
-  if(!data){
-    const nuevo = await db
-      .from("usuarios")
-      .insert({nombre, pin, rol:"usuario"})
-      .select()
-      .single();
-
-    data = nuevo.data;
-    error = nuevo.error;
-  }else if(data.pin !== pin){
-    alert("PIN incorrecto.");
+  if(error){
+    alert("Error: " + error.message);
     return;
   }
 
-  if(error){
-    alert("Error: " + error.message);
+  if(!data){
+    alert("Usuario no registrado. Pida al administrador que lo cree.");
+    return;
+  }else if(data.pin !== pin){
+    alert("PIN incorrecto.");
     return;
   }
 
