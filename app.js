@@ -12,6 +12,7 @@ let apiSyncFallos = 0;
 const API_SYNC_INTERVALO_MS = 5 * 60 * 1000;
 const API_SYNC_REINTENTO_BASE_MS = 30 * 1000;
 const API_SYNC_REINTENTO_MAX_MS = 15 * 60 * 1000;
+const QUINIELA_INICIO_FECHA = "2026-06-20";
 const PARTIDOS_ANULADOS = new Set(["35"]);
 
 const hoy = new Date();
@@ -41,6 +42,12 @@ function crearFechaLocal(valor){
 
 function partidoAnulado(partidoId){
   return PARTIDOS_ANULADOS.has(String(partidoId));
+}
+
+function partidoCuentaEnQuiniela(partido, partidoId){
+  if(partidoAnulado(partidoId)) return false;
+  if(!partido || !partido.fecha) return false;
+  return String(partido.fecha).slice(0, 10) >= QUINIELA_INICIO_FECHA;
 }
 
 function cambiarFecha(dias){
@@ -1013,7 +1020,7 @@ async function cargarRankingDiario(){
   if(data){
     data.forEach(item=>{
       if(!item.usuarios || !item.partidos) return;
-      if(partidoAnulado(item.partido_id)) return;
+      if(!partidoCuentaEnQuiniela(item.partidos, item.partido_id)) return;
 
       const nombre = item.usuarios.nombre;
 
@@ -1065,7 +1072,8 @@ async function cargarRankingGlobal(){
     .select(`
       puntos,
       partido_id,
-      usuarios(nombre)
+      usuarios(nombre),
+      partidos(fecha)
     `);
 
   const tbody = document.getElementById("rankingGlobal");
@@ -1081,7 +1089,7 @@ async function cargarRankingGlobal(){
   if(data){
     data.forEach(item=>{
       if(!item.usuarios) return;
-      if(partidoAnulado(item.partido_id)) return;
+      if(!partidoCuentaEnQuiniela(item.partidos, item.partido_id)) return;
 
       const nombre = item.usuarios.nombre;
 
@@ -1120,7 +1128,8 @@ async function cargarEstadisticas(){
     .select(`
       puntos,
       partido_id,
-      usuarios(nombre)
+      usuarios(nombre),
+      partidos(fecha)
     `);
 
   const tbody = document.getElementById("estadisticas");
@@ -1136,7 +1145,7 @@ async function cargarEstadisticas(){
   if(data){
     data.forEach(item=>{
       if(!item.usuarios) return;
-      if(partidoAnulado(item.partido_id)) return;
+      if(!partidoCuentaEnQuiniela(item.partidos, item.partido_id)) return;
 
       const nombre = item.usuarios.nombre;
 
