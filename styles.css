@@ -241,6 +241,25 @@ button:hover{
   margin:10px 0;
 }
 
+.api-status{
+  line-height:1.45;
+}
+
+.api-status.ok{
+  background:#ecfdf5;
+  border-left-color:#0f766e;
+}
+
+.api-status.info{
+  background:#eff6ff;
+  border-left-color:#2563eb;
+}
+
+.api-status.error{
+  background:#fef2f2;
+  border-left-color:#dc2626;
+}
+
 .locked{
   background:#fef3c7;
   border-left:5px solid #d97706;

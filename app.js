@@ -4,6 +4,14 @@ const SUPABASE_KEY = "sb_publishable_J57IuliY3QIvfiS7mmBDjQ_A8SmNpYJ";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let usuario = null;
+let apiSyncIntervalo = null;
+let apiSyncReintento = null;
+let apiSyncEnCurso = false;
+let apiSyncFallos = 0;
+
+const API_SYNC_INTERVALO_MS = 5 * 60 * 1000;
+const API_SYNC_REINTENTO_BASE_MS = 30 * 1000;
+const API_SYNC_REINTENTO_MAX_MS = 15 * 60 * 1000;
 
 const hoy = new Date();
 
@@ -56,8 +64,58 @@ function ocultarBotonCerrarSesion(){
   document.getElementById("btnCerrarSesion").style.display = "none";
 }
 
+function actualizarEstadoAPI(mensaje, tipo){
+  const estado = document.getElementById("apiSyncStatus");
+  if(!estado) return;
+
+  estado.className = "notice api-status " + (tipo || "info");
+  estado.innerText = mensaje;
+}
+
+function detenerAutomatizacionAPI(){
+  if(apiSyncIntervalo){
+    clearInterval(apiSyncIntervalo);
+    apiSyncIntervalo = null;
+  }
+
+  if(apiSyncReintento){
+    clearTimeout(apiSyncReintento);
+    apiSyncReintento = null;
+  }
+
+  apiSyncFallos = 0;
+}
+
+function programarReintentoAPI(){
+  if(!usuario || usuario.rol !== "admin") return;
+  if(apiSyncReintento) return;
+
+  const demora = Math.min(
+    API_SYNC_REINTENTO_BASE_MS * Math.pow(2, Math.max(apiSyncFallos - 1, 0)),
+    API_SYNC_REINTENTO_MAX_MS
+  );
+
+  apiSyncReintento = setTimeout(async () => {
+    apiSyncReintento = null;
+    await sincronizarPartidosAPI({silencioso:true, origen:"reintento"});
+  }, demora);
+}
+
+function iniciarAutomatizacionAPI(){
+  if(!usuario || usuario.rol !== "admin") return;
+
+  detenerAutomatizacionAPI();
+  actualizarEstadoAPI("Sincronizacion automatica activa. Revisando la API cada 5 minutos.", "ok");
+
+  sincronizarPartidosAPI({silencioso:true, origen:"inicio"});
+  apiSyncIntervalo = setInterval(() => {
+    sincronizarPartidosAPI({silencioso:true, origen:"programado"});
+  }, API_SYNC_INTERVALO_MS);
+}
+
 function cerrarSesion(){
   usuario = null;
+  detenerAutomatizacionAPI();
 
   localStorage.removeItem("nombreUsuario");
   localStorage.removeItem("pinUsuario");
@@ -119,6 +177,12 @@ async function entrar(){
   document.getElementById("btnAdmin").style.display =
     usuario.rol === "admin" ? "block" : "none";
 
+  if(usuario.rol === "admin"){
+    iniciarAutomatizacionAPI();
+  }else{
+    detenerAutomatizacionAPI();
+  }
+
   mostrarVista("pronosticos");
   cargarTodo();
 }
@@ -153,6 +217,58 @@ function obtenerCampo(obj, opciones){
     }
   }
   return null;
+}
+
+function normalizarMarcador(valor){
+  if(valor === undefined || valor === null) return null;
+
+  const texto = String(valor).trim();
+  if(texto === "" || texto === "-" || texto.toLowerCase() === "null") return null;
+
+  const numero = Number(texto);
+  if(!Number.isFinite(numero) || numero < 0) return null;
+
+  return numero;
+}
+
+function normalizarEstadoPartido(valor){
+  if(valor === undefined || valor === null) return "";
+
+  const estado = typeof valor === "object"
+    ? obtenerCampo(valor, ["short","long","name","status","state","description"])
+    : valor;
+
+  return String(estado || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[_-]/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function partidoEstaFinalizado(valor){
+  if(valor === true) return true;
+  if(valor === false) return false;
+
+  const estado = normalizarEstadoPartido(valor);
+  if(!estado) return false;
+
+  return [
+    "ft",
+    "full time",
+    "finished",
+    "final",
+    "ended",
+    "complete",
+    "completed",
+    "closed",
+    "played",
+    "match finished",
+    "terminado",
+    "finalizado",
+    "concluido"
+  ].includes(estado);
 }
 
 const CODIGOS_PAISES = {
@@ -422,13 +538,24 @@ function mostrarPartido(equipoA, equipoB){
     '</span>';
 }
 
-async function importarPartidosAPI(){
+async function sincronizarPartidosAPI(opciones = {}){
+  const silencioso = opciones.silencioso === true;
+
+  if(apiSyncEnCurso){
+    return {ok:false, omitido:true};
+  }
+
   if(!usuario || usuario.rol !== "admin"){
-    alert("Solo el administrador puede importar partidos.");
-    return;
+    if(!silencioso){
+      alert("Solo el administrador puede importar partidos.");
+    }
+    return {ok:false, error:"sin-permiso"};
   }
 
   try{
+    apiSyncEnCurso = true;
+    actualizarEstadoAPI("Sincronizando partidos con la API...", "info");
+
     const resp = await fetch("https://worldcup26.ir/get/games", {
       method: "GET",
       headers: {"Accept": "application/json"}
@@ -445,12 +572,12 @@ async function importarPartidosAPI(){
 
     if(!juegos.length){
       console.log(json);
-      alert("La API respondió, pero no encontré partidos.");
-      return;
+      throw new Error("La API respondio, pero no encontre partidos.");
     }
 
     let importados = 0;
     let ignorados = 0;
+    let cerrados = 0;
 
     for(const g of juegos){
       const id = String(obtenerCampo(g, ["id","game_id","match_id","_id"]));
@@ -467,52 +594,117 @@ async function importarPartidosAPI(){
 
       const marcadorA = obtenerCampo(g, ["home_score","home_goals","score_home","goals_home"]);
       const marcadorB = obtenerCampo(g, ["away_score","away_goals","score_away","goals_away"]);
+      const golesA = normalizarMarcador(marcadorA);
+      const golesB = normalizarMarcador(marcadorB);
 
-      const finalizadoRaw = obtenerCampo(g, ["finished","is_finished","status","match_status"]);
-      const cerrado =
-        finalizadoRaw === true ||
-        finalizadoRaw === "TRUE" ||
-        finalizadoRaw === "true" ||
-        finalizadoRaw === "finished" ||
-        finalizadoRaw === "FT";
+      const finalizadoRaw = obtenerCampo(g, [
+        "finished",
+        "is_finished",
+        "status",
+        "match_status",
+        "status_text",
+        "status_name",
+        "state",
+        "game_status",
+        "fixture_status"
+      ]);
+      const cerrado = partidoEstaFinalizado(finalizadoRaw) && golesA !== null && golesB !== null;
 
       if(!id || !fecha) continue;
 
-      const { data: existente } = await db
+      const { data: existente, error: existenteError } = await db
         .from("partidos")
         .select("cerrado")
         .eq("id", id)
         .maybeSingle();
+
+      if(existenteError){
+        throw existenteError;
+      }
 
       if(existente?.cerrado){
         ignorados++;
         continue;
       }
 
-      await db.from("partidos").upsert({
+      const {error: upsertError} = await db.from("partidos").upsert({
         id,
         fecha,
         equipo_a: equipoA,
         equipo_b: equipoB,
-        goles_a: marcadorA === null ? null : Number(marcadorA),
-        goles_b: marcadorB === null ? null : Number(marcadorB),
+        goles_a: cerrado ? golesA : null,
+        goles_b: cerrado ? golesB : null,
         cerrado
       }, {onConflict:"id"});
 
+      if(upsertError){
+        throw upsertError;
+      }
+
       if(cerrado){
         await calcularPuntos(id);
+        cerrados++;
       }
 
       importados++;
     }
 
-    alert("Partidos actualizados: " + importados + ". Cerrados ignorados: " + ignorados + ".");
-    cargarTodo();
+    apiSyncFallos = 0;
+    if(apiSyncReintento){
+      clearTimeout(apiSyncReintento);
+      apiSyncReintento = null;
+    }
+
+    const ahora = new Date().toLocaleTimeString("es-CR", {
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+    const mensaje = "API sincronizada a las " + ahora +
+      ". Actualizados: " + importados +
+      ". Partidos cerrados: " + cerrados +
+      ". Cerrados ya existentes: " + ignorados + ".";
+
+    actualizarEstadoAPI(mensaje, "ok");
+
+    if(!silencioso){
+      alert(mensaje);
+    }
+
+    if(importados > 0 || cerrados > 0){
+      cargarTodo();
+    }
+
+    return {ok:true, importados, ignorados, cerrados};
 
   }catch(e){
     console.error(e);
-    alert("No se pudo conectar con la API. Revise la consola.");
+    apiSyncFallos++;
+
+    const demoraSegundos = Math.round(
+      Math.min(
+        API_SYNC_REINTENTO_BASE_MS * Math.pow(2, Math.max(apiSyncFallos - 1, 0)),
+        API_SYNC_REINTENTO_MAX_MS
+      ) / 1000
+    );
+
+    actualizarEstadoAPI(
+      "No se pudo sincronizar con la API. Reintentando en " + demoraSegundos + " segundos.",
+      "error"
+    );
+    programarReintentoAPI();
+
+    if(!silencioso){
+      alert("No se pudo conectar con la API. Se seguira intentando automaticamente.");
+    }
+
+    return {ok:false, error:e};
+  }finally{
+    apiSyncEnCurso = false;
   }
+}
+
+async function importarPartidosAPI(){
+  await sincronizarPartidosAPI({silencioso:false, origen:"manual"});
 }
 
 async function cargarTodo(){
@@ -685,23 +877,37 @@ async function guardarResultado(partidoId){
     return;
   }
 
-  await calcularPuntos(partidoId);
+  try{
+    await calcularPuntos(partidoId);
+  }catch(e){
+    console.error(e);
+    alert("Resultado guardado, pero no se pudieron calcular los puntos. Intente sincronizar de nuevo.");
+    return;
+  }
 
   alert("Resultado guardado y puntos calculados.");
   cargarTodo();
 }
 
 async function calcularPuntos(partidoId){
-  const {data:partido} = await db
+  const {data:partido, error: partidoError} = await db
     .from("partidos")
     .select("*")
     .eq("id", partidoId)
     .single();
 
-  const {data:pronosticos} = await db
+  if(partidoError){
+    throw partidoError;
+  }
+
+  const {data:pronosticos, error: pronosticosError} = await db
     .from("pronosticos")
     .select("*")
     .eq("partido_id", partidoId);
+
+  if(pronosticosError){
+    throw pronosticosError;
+  }
 
   if(!partido || !pronosticos) return;
 
@@ -736,10 +942,14 @@ async function calcularPuntos(partidoId){
       puntos = 1;
     }
 
-    await db
+    const {error: puntosError} = await db
       .from("pronosticos")
       .update({ puntos })
       .eq("id", pr.id);
+
+    if(puntosError){
+      throw puntosError;
+    }
   }
 }
 
